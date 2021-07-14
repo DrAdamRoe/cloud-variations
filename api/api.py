@@ -1,13 +1,14 @@
-from flask import Flask, jsonify
+from flask import Flask, request
+
+from api.hello_cloud import hello_cloud
+
 
 app = Flask(__name__)
-
 
 @app.route('/')
 @app.route('/api/meetings/all', methods=['GET'])
 def index():
-    data = {"message":"Hello, Cloud!"}
-    return jsonify(data)
+    return hello_cloud(request)
 
 
 if __name__ == "__main__":

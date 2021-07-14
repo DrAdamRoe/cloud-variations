@@ -94,7 +94,8 @@ Enable the cloud functions service on your project:
 
 And now we will deploy a single _function_ from our application, the function index(): 
 
-`gcloud functions deploy index --runtime python38 --trigger-http --allow-unauthenticated --max-instances 2`
+`gcloud functions deploy hello_cloud --runtime python38 --trigger-http --allow-unauthenticated --max-instances 2 --set-build-env-vars=GOOGLE_FUNCTION_SOURCE=api/hello_cloud.py`
 
+This reads as: "Hey Google, deploy a Cloud Function for me called hello_cloud, which is both the name of the function that I've defined as well as the name that you'll use to identify the function. That function in the file api/hello_cloud.py. It should use the Python 3.8 runtime, anyone can access it on the internet without authentication, but only allow 2 instance to not run up my bill. Run the function if there is an HTTP request to the URI". 
 
 ## Variation: Managed Kuberentes Cluster (GKE)
