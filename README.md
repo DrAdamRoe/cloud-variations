@@ -94,7 +94,7 @@ Enable the cloud functions service on your project:
 
 And now we will deploy a single _function_ from our application, the function index(): 
 
-`gcloud functions deploy index --runtime python38 --trigger-http --allow-unauthenticated`
+`gcloud functions deploy index --runtime python38 --trigger-http --allow-unauthenticated --max-instances 2`
 
 
 ## Variation: Managed Kuberentes Cluster (GKE)
