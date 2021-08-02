@@ -1,0 +1,11 @@
+venv/*
+.vscode/*
+__pycache__/
+*.pyc
+.DS_Store
+
+documentation/
+.git 
+app-engine.yaml
+README.md
+.gcloudignore
