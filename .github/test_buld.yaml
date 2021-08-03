@@ -1,0 +1,29 @@
+name: Build and Test Flask App 
+
+on: [push]
+
+jobs: 
+  build-and-test:
+    # ubuntu 18 is built on debian 10 (buster), which is what Python provides us as a docker image 
+    # we'll use that here since it's the most similar environment provided by GitHub.  
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Python 3.8.x
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+          architecture: x64
+      - name: Display Python Version (should be 3.8.x)
+        run: python -c "import sys; print(sys.version)"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      # this is only a simple test of the flask app itself
+      - name: Test 
+        run:  python -m unittest -v tests/test_api.py
+
+          
+
+
