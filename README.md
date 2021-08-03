@@ -9,9 +9,9 @@ Pull Requests are highly welcome, for example for corrections, clarifications, o
 1. [The Cloud Variations](#the-cloud-variations)
 1. [Local Installation and Operations](#Local-Installation-and-Operations)
 1. [Starting on the Cloud](#Starting-on-The-Cloud)
-1. [Variation: Functions-as-a-Service](#Variation:-Functions-as-a-Service)
-1. [Variation: Platform-as-a-Service](#Variation:-Platform-as-a-Service)
-1. [Variation: Managed Kubernetes Cluster](#Variation:-Managed-Kubernetes-Cluster)
+1. [Variation: Functions-as-a-Service](#Variation-Functions-as-a-Service)
+1. [Variation: Platform-as-a-Service](#Variation-Platform-as-a-Service)
+1. [Variation: Managed Kubernetes Cluster](#Variation-Managed-Kubernetes-Cluster)
 1. [Make This Your Own](#make-this-your-own)
 
 ## Local Installation and Operations 
