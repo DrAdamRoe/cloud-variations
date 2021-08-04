@@ -67,7 +67,7 @@ jobs:
         uses: google-github-actions/deploy-cloudrun@main
         with:
           service: hello-cloud-run
-          image: europe-west3-docker.pkg.dev/${{ env.PROJECT_ID }}/hello-cloud/hello-cloud:latest
+          image: europe-west3-docker.pkg.dev/cloud-variations-fs2021/hello-cloud/hello-cloud:latest
           region: europe-west3
           flags: --port=5000
           credentials: ${{ secrets.GCP_KEY }}      
