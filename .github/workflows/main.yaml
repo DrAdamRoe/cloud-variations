@@ -55,9 +55,29 @@ jobs:
           credentials: ${{ secrets.GCP_KEY }}      
       - name: Test Google Cloud Functions deployment 
         run: curl "${{ steps.deploy-functions.outputs.url }}"
-# job to test against Cloud Run  
-  test-run:
+# job to test against Cloud Run
+  build-container: 
     needs: build-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Cloud SDK
+        uses: google-github-actions/setup-gcloud@v0.2.1
+        with:
+          service_account_key: ${{ secrets.GCP_KEY }} 
+          export_default_credentials: true 
+          
+      - name: Authorize Docker push
+        run: gcloud auth configure-docker
+
+      - name: Build and Push Container
+        run: |
+          docker build -tag europe-west3-docker.pkg.dev/cloud-variations-fs2021/hello-cloud/hello-cloud:latest
+          docker push europe-west3-docker.pkg.dev/cloud-variations-fs2021/hello-cloud/hello-cloud:latest
+  test-run:
+    needs: build-container
     runs-on: ubuntu-latest
     steps: 
       - name: Checkout
