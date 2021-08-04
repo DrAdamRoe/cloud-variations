@@ -23,7 +23,15 @@ jobs:
       # this is only a simple test of the flask app itself
       - name: Test 
         run:  python -m unittest -v tests/test_api.py
-
-          
+  # job to test against App Engine
+  test-app-engine:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    steps: 
+      - name: Deploy to Google App Engine
+        uses: google-github-actions/deploy-appengine@main
+        with:
+          deliverables: app-engine.yaml
+          credentials: ${{ secrets.GCP_KEY }}      
 
 
