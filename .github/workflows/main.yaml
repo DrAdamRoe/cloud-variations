@@ -55,5 +55,21 @@ jobs:
           credentials: ${{ secrets.GCP_KEY }}      
       - name: Test Google Cloud Functions deployment 
         run: curl "${{ steps.deploy-functions.outputs.url }}"
-
+# job to test against Cloud Run  
+  test-run:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    steps: 
+      - name: Checkout
+        uses: actions/checkout@v2        
+      - name: Deploy to Google Cloud Run
+        id: deploy-run
+        uses: google-github-actions/deploy-cloudrun@main
+        with:
+          service: hello-cloud-run
+          image: europe-west3-docker.pkg.dev/cloud-variations-fs2021/hello-cloud/hello-cloud:latest
+          region: europe-west3
+          credentials: ${{ secrets.GCP_KEY }}      
+      - name: Test Google Cloud Functions deployment 
+        run: curl "${{ steps.deploy-run.outputs.url }}"
 
