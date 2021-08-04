@@ -31,7 +31,10 @@ jobs:
       - name: Deploy to Google App Engine
         uses: google-github-actions/deploy-appengine@main
         with:
+          working_directory: ./
           deliverables: app-engine.yaml
           credentials: ${{ secrets.GCP_KEY }}      
+      - name: Test Google App Engine deployment 
+        run: curl "${{ steps.deploy.outputs.url }}"
 
 
