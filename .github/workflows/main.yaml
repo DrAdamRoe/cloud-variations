@@ -28,10 +28,11 @@ jobs:
     needs: build-and-test
     runs-on: ubuntu-latest
     steps: 
+      - name: Checkout
+        uses: actions/checkout@v2        
       - name: Deploy to Google App Engine
         uses: google-github-actions/deploy-appengine@main
         with:
-          working_directory: ./
           deliverables: app-engine.yaml
           credentials: ${{ secrets.GCP_KEY }}      
       - name: Test Google App Engine deployment 
