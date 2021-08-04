@@ -11,6 +11,8 @@ Pull Requests are highly welcome, for example for corrections, clarifications, o
 1. [Starting on the Cloud](#Starting-on-The-Cloud)
 1. [Variation: Functions-as-a-Service](#Variation-Functions-as-a-Service)
 1. [Variation: Platform-as-a-Service](#Variation-Platform-as-a-Service)
+1. [Intermission: Containerize the Application](#Intermission-Containerize-the-Application)
+1. [Variation: Serverless Container Management](#Variation:-Serverless-Container-Management)
 1. [Variation: Managed Kubernetes Cluster](#Variation-Managed-Kubernetes-Cluster)
 1. [Make This Your Own](#make-this-your-own)
 
@@ -24,6 +26,7 @@ Before you get started, you are expected to have some other software on your com
 - git 
 - [Google Cloud SDK](https://cloud.google.com/sdk/docs/quickstart), (tested with version 350.0.0)
 - An integrated development environment, like VS Code. 
+- [Docker](https://www.docker.com/products/docker-desktop) for building and running docker images locally
 
 ### Install Locally   
 - mkdir WORKING_DIR && cd WORKING_DIR, with a directory name of your choice (e.g. cloud2021). 
@@ -151,20 +154,13 @@ Now, we can deploy our app! The application configuration is entirely described 
 
 And there we have it: your app is deployed! Look at that yaml file and see what we need to describe the infrastructure: a runtime (Python version), an instance class (the size of the VM we will us, in this case, [F2](https://cloud.google.com/appengine/docs/standard), with a half GB of RAM), and some routing rules - similar to what we would need to define for a web server application like nginx, Caddy, or Apache. This tells app engine to respond to any request with the response of our application (as opposed to a redirect request, serving a static file, or an error, for instance. In this variation, we are able to specify resources (like the compute instance size), but still are not concerned with things like the underlying operating system. 
 
-## Variation: Managed Kubernetes Cluster
+## Intermission: Containerize the Application
 
-We've already run some high-level managed versions of our API, and now we are going to take things a bit more into our own hands, running our service in Kubernetes. We will use Google Kubernetes Engine, Google's managed Kubernetes cluster, so we only have to _use_ Kubernetes, not host it ourselves. 
+In order to prepare for the next variations of running our app, we will first build the container ourselves (using Docker) and push it to Google Cloud's container registry, allowing us to use that container on various managed services. 
 
-### Additional Software 
-In this version, we will build the container ourselves (using Docker), push it to Google Cloud's container registry, configure and deploy our container to Kubernetes. In order to do this, we need to install two more tools locally: 
+### Build and Run the container locally 
 
-- [Install Docker](https://www.docker.com/products/docker-desktop) for building and running docker images locally
-- [Install kubectl](https://kubernetes.io/docs/tasks/tools/), the command line interface for interacting with Kubernetes itself. 
-
-
-### Containerize the Application 
-
-To start this variation, build a Docker image, based on the Dockerfile provided for you in this repository: 
+To start, build a Docker image, based on the Dockerfile provided for you in this repository: 
 
 `docker build --tag hello-cloud .`
 
@@ -176,17 +172,15 @@ At this point, you should be able to again make a request locally, via `curl loc
 
 At this stage it is worth it to have a look at our Dockerfile, even if you aren't very familiar with Docker. We first define which base image we are using - in this case, an imagine provided by the Python Organization built on top of Debian 10 (codename buster). This gives us an operating system and everything we need to run Python 3.8. Then, we copy files from our local development environment into Docker's working area, and after that, we do the same thing as we do locally without Docker: install packages, set an environment variable, and run the app. Just this time, it is running as a Docker container on our own computer. 
 
-### Run our container using Kubernetes
-Now it's time to run our Docker container on the cloud. 
+### Push the Image to Google Cloud 
 
-Start by Enabling the Artifact Registry (for storing our image) and Google Kubernetes Engine APIs: 
+In this step, we will push our image to Google Artifact Registry -- a dedicated type of storage which we will configure to store Docker images (similar to Docker Hub, if you are familiar with it). 
+
+Start by Enabling the Artifact Registry:
 
 `gcloud services enable artifactregistry.googleapis.com`
-`gcloud services enable container.googleapis.com`
 
-Before we forget, let's push our recently built Docker Image to Google's Artifact Repository, later allowing it to be pulled by the Kubernetes Cluster we are going to set up. 
-
-Use the tool provided by gCloud to authorize yourself on Docker on your machine to push to your Google Cloud Artifact Registry: 
+Now, we'll push your Docker Image to Google's Artifact Repository. To do this, we will use the tool provided by gCloud to authorize yourself on Docker on your machine giving you permissions to push to your Google Cloud Artifact Registry: 
 
 `gcloud auth configure-docker europe-west3-docker.pkg.dev`
 
@@ -194,7 +188,9 @@ Next, create a repository in the Artifact Registry for you to store your image i
 
 `gcloud artifacts repositories create hello-cloud --repository-format=docker --location=europe-west3`
 
-Now you can tag your local image to push to a specific location, telling Docker where you will push it -- the repository you just created. You should replace `cloud-variations-fs2021` with your project name: 
+Note that the format "Docker" specifies that what type of artifact the repository should expect, a Docker Image. 
+
+Now you can tag your local image to push to a specific location, telling Docker where you will push it: to the repository you just created. You should replace `cloud-variations-fs2021` with your project name: 
 
 `docker tag hello-cloud:latest europe-west3-docker.pkg.dev/cloud-variations-fs2021/hello-cloud/hello-cloud:latest`
 
@@ -202,20 +198,56 @@ And finally, push it to Google's Artifact Repository:
 
 `docker push europe-west3-docker.pkg.dev/cloud-variations-fs2021/hello-cloud/hello-cloud:latest`
 
-Phew. We've built a Docker image locally and pushed it to Google Cloud. 
+Phew. We've built a Docker image locally and pushed it to Google Cloud. You can see the fruits of your labors (and browse the directory structure) over on the dashboard at https://console.cloud.google.com/gcr/images/{your-project-name}. 
 
+## Variation: Serverless Container Management 
+
+Sometimes cloud services feels like they were generated by putting random buzzwords together, and Cloud Run is no exception. In this variation, we will run our custom-built container on a platform managed by our cloud provider. We can will use a service which conforms to the [knative](https://knative.dev/) standard, giving us more flexibility than a Functions-as-a-Service offering but without the need to provision an entire Kubernetes cluster. This is considered "serverless" because you don't need to manage any servers, even if it is not a "Function-as-a-Service" offering. 
+
+First, enable the Google Cloud Run API: 
+
+`gcloud services enable run.googleapis.com`
+
+Then, we will create and deploy our new _service_, which will tell Cloud Run to run between 2 and 5 instances of our container based on the image we have built and pushed already. 
+
+`gcloud run deploy hello-cloud-run --image=europe-west3-docker.pkg.dev/cloud-variations-fs2021/hello-cloud/hello-cloud:latest --port=5000 --region=europe-west3 --allow-unauthenticated --min-instances=2 --max-instances=5`
+
+This command should feel a bit like the one we used for the FaaS offering at the start, but with a bit more control. 
+
+Go over to the [dashboard](https://console.cloud.google.com/run/) and poke around a bit to see what you have running there.
+
+Once you are done, remember to cleanup by deleting the service -- otherwise it could suck up all your credits: 
+
+`gcloud run services delete hello-cloud-run`
+
+
+## Variation: Managed Kubernetes Cluster
+
+We've already run some high-level managed versions of our API, and now we are going to take things a bit more into our own hands, running our service in Kubernetes. We will use Google Kubernetes Engine, Google's managed Kubernetes cluster, so we only have to _use_ Kubernetes, not host it ourselves. 
+
+! Note that this may get a little bit tricky on your local machine. If you have trouble with further installation and configuration, you access the [gCloud Shell](https://cloud.google.com/shell) through your browser, giving you a command line interface allowing you to interact with your project. 
+
+### Additional Software 
+
+- [Install kubectl](https://kubernetes.io/docs/tasks/tools/), the command line interface for interacting with Kubernetes itself. 
+
+
+### Run our container using Kubernetes
+Now it's time to run our Docker container on our own Kubernetes Cluster. 
+
+Enable the Google Kubernetes Engine API: 
+
+`gcloud services enable container.googleapis.com`
 
 Now we can create a Kubernetes cluster: 
 
 `gcloud container clusters create hello-cloud-cluster --num-nodes=1`
 
-You may crash out with an error that says _Please specify location_. Now that we are taking control of our infrastructure, we have to decide where it runs. Let's set it to Frankfurt: 
+You may crash out with an error that says _Please specify location_. Let's set it to Frankfurt: 
 
 `gcloud config set compute/zone europe-west3-b`
 
 and try again to create the cluster with the above command. Now you should get a few yellow warnings, but no red errors. 
-
-! Note at this point that if you have trouble with further installation and configuration, you access the [gCloud Shell](https://cloud.google.com/shell) through your browser, giving you a command line interface allowing you to interact with your project. 
 
 And now we are ready to interact with our Kubernetes cluster!
 
@@ -229,7 +261,7 @@ Create a _deployment_ based on our Docker image, effectively declaring that we w
 
 `kubectl create deployment hello-cloud-server --image=europe-west3-docker.pkg.dev/cloud-variations-fs2021/hello-cloud/hello-cloud:latest`
 
-It's running already, but we have to expose it on the network to see it, mapping our local port 5000 to the public port 80 for HTTP: 
+Once you have run this, it is running already, but we have to expose it on the network to see it, mapping our local port 5000 to the public port 80 for HTTP: 
 
 `kubectl expose deployment hello-cloud-server --type LoadBalancer --port 80 --target-port 5000`
 
@@ -247,27 +279,6 @@ Before you leave: shut off your Kube cluster, otherwise you'll run out of money,
 
 `gcloud container clusters delete hello-cloud-cluster`
 
-## Variation: Serverless Container Management 
-
-Sometimes cloud services feels like they were generated by putting random buzzwords together, and Cloud Run is no exception. In this variation, we will run our custom-built container on a platform managed by our cloud provider. We can will use a service which conforms to the [knative](https://knative.dev/) standard, giving us more flexibility than a Functions-as-a-Service offering but without the need to provision an entire (managed) Kuberenetes cluster. 
-
-If you haven't yet built and pushed a Docker image, install Docker locally and follow the instructions above for [containerizing the application](#Containerize-the-Application). 
-
-First, enable the Google Cloud Run API: 
-
-`gcloud services enable run.googleapis.com`
-
-Then, we will create and deploy our new _service_, which will tell Cloud Run to run between 2 and 5 instances of our container based on the image we have built and pushed already. 
-
-`gcloud run deploy hello-cloud-run --image=europe-west3-docker.pkg.dev/cloud-variations-fs2021/hello-cloud/hello-cloud:latest --port=5000 --region=europe-west3 --allow-unauthenticated --min-instances=2 --max-instances=5`
-
-This command should feel a bit like the one we used for the FaaS offering at the start, and also a bit like the ones we used for the kubernetes cluster. It is indeed somewhere in between these offerings. 
-
-Go over to the [dashboard](https://console.cloud.google.com/run/) and poke around a bit to see what you have running there.
-
-Once you are done, remember to cleanup by deleting the service -- otherwise it could suck up all your credits: 
-
-`gcloud run services delete hello-cloud-run`
 
 ## Cleanup! 
 
