@@ -6,7 +6,6 @@ from api.hello_cloud import hello_cloud
 app = Flask(__name__)
 
 @app.route('/')
-@app.route('/api/meetings/all', methods=['GET'])
 def index():
     return hello_cloud(request)
 
