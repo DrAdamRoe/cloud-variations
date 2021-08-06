@@ -12,7 +12,7 @@ Pull Requests are highly welcome, for example for corrections, clarifications, o
 1. [Variation: Functions-as-a-Service](#Variation-Functions-as-a-Service)
 1. [Variation: Platform-as-a-Service](#Variation-Platform-as-a-Service)
 1. [Intermission: Containerize the Application](#Intermission-Containerize-the-Application)
-1. [Variation: Serverless Container Management](#Variation:-Serverless-Container-Management)
+1. [Variation: Serverless Container Management](#Variation-Serverless-Container-Management)
 1. [Variation: Managed Kubernetes Cluster](#Variation-Managed-Kubernetes-Cluster)
 1. [Make This Your Own](#make-this-your-own)
 
