@@ -24,7 +24,7 @@ Before you get started, you are expected to have some other software on your com
 
 - Python 3.8 (tested with 3.8.6)
 - git 
-- [Google Cloud SDK](https://cloud.google.com/sdk/docs/quickstart), (tested with version 350.0.0)
+- [Google Cloud SDK](https://cloud.google.com/sdk/docs/quickstart), (tested with version 357.0.0)
 - An integrated development environment, like VS Code. 
 - [Docker](https://www.docker.com/products/docker-desktop) for building and running docker images locally
 
