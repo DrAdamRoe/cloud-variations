@@ -44,7 +44,7 @@ Before you get started, you are expected to have some other software on your com
     
     Windows: `venv\Scripts\activate.bat`
 
-- Install packages: `pip install -r requirements.tst`
+- Install packages: `pip install -r requirements.txt`
 
 
 - Point Flask to your application: 
