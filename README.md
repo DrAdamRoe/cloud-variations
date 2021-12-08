@@ -300,3 +300,22 @@ Now that you have run through four variations, you are encouraged to make this y
 
 - Add a database layer using a managed service. You can put the message we are returning into that database. What do you have to consider to connect this application to the database, with each of these methods? What database services are available, and which are appropriate for this application? 
 
+## Troubleshooting 
+
+Weird problems can occur. Here are a few we've seen so far, and possibly ways to remedy them. 
+
+### Too Many Versions 
+If you see an error like this, you need to delete old (unused) versions of your app. 
+
+> ERROR: (gcloud.app.deploy) INVALID_ARGUMENT: Your app may not have more than 15 versions. Please delete one of the existing versions before trying to create a new version
+
+You can do this by clicking through the gCloud Console and manually deleting them. Or, you can use a fancy command like this: 
+
+``gcloud app versions delete `gcloud app versions list --filter="traffic_split=0" --format="table(version.id)"` ``
+
+This monstrous command is really two in one. The inner command, within backticks (`` ` ``), is executed first. This will list all versions of the app which have no traffic flowing to them (hence the `--filter`), but will only list the versions id and no other information (hence the `--format`). This list will be parsed, line by line, by the outer command, which will try to delete those app versions. 
+
+
+
+
+
