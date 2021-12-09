@@ -170,7 +170,7 @@ and run it locally:
 
 At this point, you should be able to again make a request locally, via `curl localhost:5017` or by going to the browser. 
 
-At this stage it is worth it to have a look at our Dockerfile, even if you aren't very familiar with Docker. We first define which base image we are using - in this case, an imagine provided by the Python Organization built on top of Debian 10 (codename buster). This gives us an operating system and everything we need to run Python 3.8. Then, we copy files from our local development environment into Docker's working area, and after that, we do the same thing as we do locally without Docker: install packages, set an environment variable, and run the app. Just this time, it is running as a Docker container on our own computer. 
+At this stage it is worth it to have a look at our Dockerfile, even if you aren't very familiar with Docker. We first define which base image we are using - in this case, an imagine provided by the Python Organization built on top of Debian 11 (codename bullseye). This gives us an operating system and everything we need to run Python 3.9. Then, we copy files from our local development environment into Docker's working area, and after that, we do the same thing as we do locally without Docker: install packages, set an environment variable, and run the app. Just this time, it is running as a Docker container on our own computer. 
 
 ### Push the Image to Google Cloud 
 
