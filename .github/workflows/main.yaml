@@ -9,12 +9,12 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
-      - name: Setup Python 3.8.x
+      - name: Setup Python 3.9.x
         uses: actions/setup-python@v2
         with:
-          python-version: 3.8
+          python-version: 3.9
           architecture: x64
-      - name: Display Python Version (should be 3.8.x)
+      - name: Display Python Version (should be 3.9.x)
         run: python -c "import sys; print(sys.version)"
       - name: Install dependencies
         run: |
@@ -50,7 +50,7 @@ jobs:
         uses: google-github-actions/deploy-cloud-functions@main
         with:
           name: hello_cloud
-          runtime: python38
+          runtime: python39
           region: europe-west3
           credentials: ${{ secrets.GCP_KEY }}      
       - name: Test Google Cloud Functions deployment 

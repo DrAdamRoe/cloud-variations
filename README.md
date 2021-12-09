@@ -22,9 +22,9 @@ The goal of this section is to install and run our little web server locally on 
 ### Pre-Installed Requirements 
 Before you get started, you are expected to have some other software on your computer
 
-- Python 3.8 (tested with 3.8.6)
+- Python 3.9 (tested with 3.9.9)
 - git 
-- [Google Cloud SDK](https://cloud.google.com/sdk/docs/quickstart), (tested with version 357.0.0)
+- [Google Cloud SDK](https://cloud.google.com/sdk/docs/quickstart), (tested with version 366.0.0)
 - An integrated development environment, like VS Code. 
 - [Docker](https://www.docker.com/products/docker-desktop) for building and running docker images locally
 
@@ -32,11 +32,11 @@ Before you get started, you are expected to have some other software on your com
 - mkdir WORKING_DIR && cd WORKING_DIR, with a directory name of your choice (e.g. cloud2021). 
 - git clone this repository locally
 
-- Install a local python virtual environment with python 3.8 to work with, 
+- Install a local python virtual environment with python 3.9 to work with, 
 
-    macOS/Linux: `python3.8 -m venv venv` 
+    macOS/Linux: `python3.9 -m venv venv` 
     
-    Windows: `c:\Python38\python -m venv c:\path\to\myenv`
+    Windows: `c:\Python39\python -m venv c:\path\to\myenv`
 
 - Activate your virtual environment for this project: 
    
@@ -126,7 +126,7 @@ Enable the cloud functions service on your project:
 
 And now we will deploy a single _function_ from our application, the function `index()` found in the file `api/hello_cloud.py`: 
 
-`gcloud functions deploy hello_cloud --runtime python38 --trigger-http --allow-unauthenticated --max-instances 2 --set-build-env-vars=GOOGLE_FUNCTION_SOURCE=api/hello_cloud.py --region=europe-west3`
+`gcloud functions deploy hello_cloud --runtime python39 --trigger-http --allow-unauthenticated --max-instances 2 --set-build-env-vars=GOOGLE_FUNCTION_SOURCE=api/hello_cloud.py --region=europe-west3`
 
 This reads as: "Hey Google, deploy a Cloud Function for me called hello_cloud, which is both the name of the function that I've defined as well as the name that you'll use to identify the function. That function in the file api/hello_cloud.py. It should use the Python 3.8 runtime, anyone can access it on the internet without authentication, but only allow 2 instance to not run up my bill. Run the function if there is an HTTP request to the URL". 
 
