@@ -89,7 +89,7 @@ jobs:
           service: hello-cloud-run
           image: europe-west3-docker.pkg.dev/cloud-variations-fs2021/hello-cloud/hello-cloud:latest
           region: europe-west3
-          flags: --port=5000 --allow-unauthenticated 
+          flags: --port=5022 --allow-unauthenticated 
           credentials: ${{ secrets.GCP_KEY }}      
       - name: Test Google Cloud Functions deployment 
         run: curl "${{ steps.deploy-run.outputs.url }}"
