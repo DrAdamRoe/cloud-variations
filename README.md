@@ -55,9 +55,9 @@ Before you get started, you are expected to have some other software on your com
 
 - run your flask application: 
 
-    `flask run`
+    `flask run --port=5017`
 
-Once you are running, you should be able to see a JSON response in the browser by navigating to http://localhost:5000 or by using cURL to GET a response, e.g. `curl localhost:5000`. You should now be able to see our message, `{"message": "Hello, Cloud!"}`, served locally.  
+Once you are running, you should be able to see a JSON response in the browser by navigating to http://localhost:5017 or by using cURL to GET a response, e.g. `curl localhost:5017`. You should now be able to see our message, `{"message": "Hello, Cloud!"}`, served locally.  
 
 ### Restarting your Local Development Environment
 
@@ -166,9 +166,9 @@ To start, build a Docker image, based on the Dockerfile provided for you in this
 
 and run it locally: 
 
-`docker run --publish 5000:5000 hello-cloud`
+`docker run --publish 5017:5022 hello-cloud`
 
-At this point, you should be able to again make a request locally, via `curl localhost:5000` or by going to the browser. 
+At this point, you should be able to again make a request locally, via `curl localhost:5017` or by going to the browser. 
 
 At this stage it is worth it to have a look at our Dockerfile, even if you aren't very familiar with Docker. We first define which base image we are using - in this case, an imagine provided by the Python Organization built on top of Debian 10 (codename buster). This gives us an operating system and everything we need to run Python 3.8. Then, we copy files from our local development environment into Docker's working area, and after that, we do the same thing as we do locally without Docker: install packages, set an environment variable, and run the app. Just this time, it is running as a Docker container on our own computer. 
 
@@ -210,9 +210,9 @@ First, enable the Google Cloud Run API:
 
 Then, we will create and deploy our new _service_, which will tell Cloud Run to run between 2 and 5 instances of our container based on the image we have built and pushed already. 
 
-`gcloud run deploy hello-cloud-run --image=europe-west3-docker.pkg.dev/cloud-variations-fs2021/hello-cloud/hello-cloud:latest --port=5000 --region=europe-west3 --allow-unauthenticated --min-instances=2 --max-instances=5`
+`gcloud run deploy hello-cloud-run --image=europe-west3-docker.pkg.dev/cloud-variations-fs2021/hello-cloud/hello-cloud:latest --port=5022 --region=europe-west3 --allow-unauthenticated --min-instances=2 --max-instances=5`
 
-This command should feel a bit like the one we used for the FaaS offering at the start, but with a bit more control. 
+This command should feel a bit like the one we used for the FaaS offering at the start, but with a bit more control. If your container runs locally but not on google cloud, you may need to change the build architecture. Have a look at the troubleshooting section below. 
 
 Go over to the [dashboard](https://console.cloud.google.com/run/) and poke around a bit to see what you have running there.
 
@@ -261,9 +261,9 @@ Create a _deployment_ based on our Docker image, effectively declaring that we w
 
 `kubectl create deployment hello-cloud-server --image=europe-west3-docker.pkg.dev/cloud-variations-fs2021/hello-cloud/hello-cloud:latest`
 
-Once you have run this, it is running already, but we have to expose it on the network to see it, mapping our local port 5000 to the public port 80 for HTTP: 
+Once you have run this, it is running already, but we have to expose it on the network to see it, mapping our local port 5022 to the public port 80 for HTTP: 
 
-`kubectl expose deployment hello-cloud-server --type LoadBalancer --port 80 --target-port 5000`
+`kubectl expose deployment hello-cloud-server --type LoadBalancer --port 80 --target-port 5022`
 
 You can now find the public (external) IP address of your application using: 
 
@@ -315,7 +315,22 @@ You can do this by clicking through the gCloud Console and manually deleting the
 
 This monstrous command is really two in one. The inner command, within backticks (`` ` ``), is executed first. This will list all versions of the app which have no traffic flowing to them (hence the `--filter`), but will only list the versions id and no other information (hence the `--format`). This list will be parsed, line by line, by the outer command, which will try to delete those app versions. 
 
+### Wrong Build Architecture for GCP
 
+If you can't deploy your container to Google Cloud Run, you might see an error like this: 
 
+>ERROR: (gcloud.run.deploy) Cloud Run error: Container failed to start. Failed to start and then listen on the port defined by the PORT environment variable. Logs for this revision might contain more information. 
+
+and upon looking at the logs, you may see something like: 
+
+> terminated: Application failed to start: Failed to create init process: failed to load /usr/local/bin/flask: exec format error 
+
+The issue is probably that your own computer's processor uses a different architecture than the one on Google Cloud, in particular if you are using a newer Mac using an ARM architecture (M1). To resolve this, you'll have to build an image for a different architecture than on your computer. The process is documented [here](https://docs.docker.com/desktop/multi-arch/). 
+
+Once you have followed the instructions there, the following build command should give you an image which you can use both locally and on Google Cloud: 
+
+> docker buildx build --platform linux/amd64 --tag hello-cloud . --load
+
+and then you can continue as above, with `docker run`, `docker tag`, `docker push`, and finally `gcloud run deploy`. Note that the local performance will be degraded with this setup, but that should be fine for this hello-world app. There are more sophisticated approaches for building for multiple architectures. 
 
 
