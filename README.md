@@ -9,6 +9,7 @@ Pull Requests are highly welcome, for example for corrections, clarifications, o
 1. [The Cloud Variations](#the-cloud-variations)
 1. [Local Installation and Operations](#Local-Installation-and-Operations)
 1. [Starting on the Cloud](#Starting-on-The-Cloud)
+1. [Prelude: Infrastructure-as-a-Service](#Variation-Infrastructure-as-a-Service)
 1. [Variation: Functions-as-a-Service](#Variation-Functions-as-a-Service)
 1. [Variation: Platform-as-a-Service](#Variation-Platform-as-a-Service)
 1. [Intermission: Containerize the Application](#Intermission-Containerize-the-Application)
@@ -133,6 +134,105 @@ This reads as: "Hey Google, deploy a Cloud Function for me called hello_cloud, w
 You should be able to now see your function running live on the internet now, at the url listed in the output of the command or in the console. It has a format like https://{Region}-{ProjectID}.cloudfunctions.net/{function-name}, in my case https://europe-west3-cloud-variations-fs2021.cloudfunctions.net/hello_cloud. 
 
 And there we have it: you can run a function on Google's Cloud without any concern for how to manage the server, just setting a few basic parameters.  
+
+## Variation: Infrastructure-as-a-Service 
+Next, we jump over to the lowest level approach available on the cloud: we will rent our own (virtual) computer, and set it up from scratch. This is, in a sense, the "old way" of doing things. Apart from buying server racks yourself, this is about as low-level as it usually gets. 
+
+Google Cloud's service for this is called Compute Engine. We will rent a computer from Google, and then do the rest ourselves. We will set this up via the browser-based console in order to get an idea for how to do it, but you of course also do this from the command line. Google Documentation can be found [here](https://cloud.google.com/python/docs/getting-started/getting-started-on-compute-engine), but the instructions below should work with our code and your setup. Hopefully. 
+
+Go to the [Google Cloud Console in the browser](https://console.cloud.google.com/), make sure you are logged in, and the correct project (created above, via the command line) is selected. You should be able to go to the [Functions List page](https://console.cloud.google.com/functions/list) and see the function `hello-cloud` which we have just created. That tells you that you are in the right place, and everything has worked so far. 
+
+Next, go to the Compute Engine page. You can find this either by navigating (as shown below) or by searching for the service in the search bar. 
+
+
+![Google Compute Engine Page](./documentation/create-instance.png) 
+
+
+Once there, click on "Create Instance". This will walk you through the process of renting a computer - or Virtual Machine - from Google Cloud. Some of the default settings are OK, others should be changed. 
+
+In particular: 
+ 
+ * Set the Region to `europe-west3` (Frankfurt)
+ * Set the Machine Type to `e2-micro` (2 CPUs, 1GB RAM
+ * Change the Boot Disk to `Debian 11` (Bullseye)
+ * Set the Firewall to "Allow HTTP Traffic" 
+ 
+Then click "Create" at the bottom of the page.
+
+ ![VM Creation Settings](./documentation/gce-settings.png) Virtual Machine Settings on Google Compute Engine
+
+Once this has been created, you should see an overview of your VM Instances (the computers you have rented). Congratulations! You have rented a computer from Google.  
+
+ ![VM Instances](./documentation/gce-settings.png) VM Instances.
+
+Now, we want to set this up to run our software. The next step is to SSH into your server. There are many ways to do this. Click on the "SSH" button to see options. "Open in Browser Window" will open a new browser window running a virtual terminal, giving you command-line access to your server. This is a fancy option which Google Cloud offers, and I would recommend trying it. You can also open this from your local command line (click on `view glcoud command` to see what you would type into your local terminal), or of course good old fashioned `ssh` from your local computer. Once in, poke around your computer a bit. The command `which python3` will show you that a version of Python is installed (I see 3.9.2, close enough), and `which git`will show that git is not installed. 
+
+Let's start by installing git: 
+
+> sudo apt-get install git 
+ 
+and then cloning this very repository to your new server: 
+
+> git clone https://github.com/DrAdamRoe/cloud-variations.git
+
+At this stage, you should be able to setup and run python using the same commands as you did locally (using the Linux/macOS instructions above): create a virtual environment, activate it, install requirements, and set FLASK_APP environment variable.
+
+Now, you should be able to run your app. Expose it on port 5017:
+
+> flask run --port=5017
+
+Your flask app is now running on a computer in the cloud, but it is not accessible on the internet yet. The port we are running on, 5017, is not a standard port. Use ctrl+c to kill the process. 
+
+What we will do next is set up our environment to run a web server on the public internet. So far, we have a Debian Linux operating system running on Google Cloud's infrastructure, and we have our code on it. A combination of steps is necessary to run our server. We'll have to install a few more things:
+
+First, we need some system-wide build tools: 
+> sudo apt-get install build-essential python3-dev 
+
+Then, we can install a production-ready Python server, uWSGI. This is a best-practice, and it is enforced by the security practices on the infrastructure we have rented and set up so far. 
+
+> pip install --version uWSGI==2.0.20
+
+Now, you should be able to run the following command:
+> uwsgi --socket 127.0.0.1:5017 --wsgi-file main.py --callable app
+
+The output to terminal looks different, but you should now be running your Flask app on your server on port 5017, once again. Go to your virtual machine's public internet address in the browser, visible on the VM Instances overview page on the Google Cloud Console. Mine is http://34.159.224.162/. You won't see your API, unfortunately. Since HTTP uses port 80 as a standard, both our browser and Google's network settings expect us to be listening on port 80, not 5017. To remedy this, we'll use a webserver called nginx. Kill the process in your terminal again (ctrl+c). We're almost there. 
+
+We'll have to use the sudo command in front of everything we will do here to configure nginx. The software should be installed by default. Start by turning the server on: 
+
+> sudo systemctl start nginx
+
+If you navigate to your computer's IP address in the browser, you should now be served the nginx default page. Now "all" we need to do is have nginx serve a response from our Flask app instead of it's default static HTML page. This repository contains a file, nginx.conf, which is a configuration file for nginx. 
+
+Copy the config file into the folder where nginx looks for configs: 
+
+> sudo cp nginx.conf /etc/nginx/sites-available/cloudvariations
+
+Then link that configuration from the sites-enabled folder: 
+
+> ln -s /etc/nginx/sites-available/cloudvariations /etc/nginx/sites-enabled/cloudvariations
+
+Now we have to remove the default configuration which nginx shipped with: 
+
+> sudo unlink /etc/nginx/sites-available/default
+> sudo rm /etc/nginx/sites-enabled/default 
+
+and we should be in good shape. 
+
+Test the configuration using: 
+> sudo nginx -t 
+
+This will catch syntax errors and some other consistency issues. If it is OK and successful, we can now finally restart nginx, which will reload the configuration files: 
+
+> sudo systemctl restart nginx
+
+If you now navigate to your website's public IP address (found on the cloud console next to that VM), you should see an error served by nginx: "502 Bad Gateway". This is actually a good sign: it means that your rented computer is forwarding HTTP requests on port 80 to nginx, which is trying to respond with whatever application is running internally. Since nothing is running right now, there's an error. 
+
+As a final step, we have to start our Flask application again, using the same command as above: 
+
+> uwsgi --socket 127.0.0.1:5017 --wsgi-file main.py --callable app
+
+There you have it: you have rented a virtual machine from Google Cloud and set up your Flask server by hand. You have enormous control using this method, but that was a few more steps than the previous approach. For this service to be usable in production, you would need to do two additional steps (at a minimum). While the webserver nginx is now set up to always be running, the Flask application is running via the terminal right now. If your connection closes, if you shut off your home computer, the process will stop on the rented server. You would need to make this run automatically. Additionally, you would need to encrypt the connection, using HTTPS instead of HTTP. There are excellent instructions for how to do this [here](https://www.digitalocean.com/community/tutorials/how-to-serve-flask-applications-with-uwsgi-and-nginx-on-ubuntu-20-04), using a slightly different set up - but it should be close enough for you to make that work, if you would like to. 
+
 
 ## Variation: Platform-as-a-Service
 
