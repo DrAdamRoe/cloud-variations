@@ -165,11 +165,11 @@ Once this has been created, you should see an overview of your VM Instances (the
 
  ![VM Instances](./documentation/gce-settings.png) VM Instances.
 
-Now, we want to set this up to run our software. The next step is to SSH into your server. There are many ways to do this. Click on the "SSH" button to see options. "Open in Browser Window" will open a new browser window running a virtual terminal, giving you command-line access to your server. This is a fancy option which Google Cloud offers, and I would recommend trying it. You can also open this from your local command line (click on `view glcoud command` to see what you would type into your local terminal), or of course good old fashioned `ssh` from your local computer. Once in, poke around your computer a bit. The command `which python3` will show you that a version of Python is installed (I see 3.9.2, close enough), and `which git`will show that git is not installed. 
+Now, we want to set this up to run our software. The next step is to SSH into your server. There are many ways to do this. Click on the "SSH" button to see options. "Open in Browser Window" will open a new browser window running a virtual terminal, giving you command-line access to your server. This is a fancy option which Google Cloud offers, and I would recommend trying it. You can also open this from your local command line (click on `view glcoud command` to see what you would type into your local terminal), or of course good old fashioned `ssh` from your local computer. Once in, poke around your computer a bit. The command `which python3` will show you that a version of Python is installed (I see 3.9.2, close enough), and `which git` will show that git is not installed. 
 
-Let's start by installing git: 
+Let's start by installing git and well as venv: 
 
-> sudo apt-get install git 
+> sudo apt-get install git python3-venv
  
 and then cloning this very repository to your new server: 
 
@@ -183,7 +183,7 @@ Now, you should be able to run your app. Expose it on port 5017:
 
 Your flask app is now running on a computer in the cloud, but it is not accessible on the internet yet. The port we are running on, 5017, is not a standard port. Use ctrl+c to kill the process. 
 
-What we will do next is set up our environment to run a web server on the public internet. So far, we have a Debian Linux operating system running on Google Cloud's infrastructure, and we have our code on it. A combination of steps is necessary to run our server. We'll have to install a few more things:
+What we will do next is set up our environment to run a web server on the public internet. So far, we have a Debian Linux operating system running on Google Cloud's infrastructure, and we have our code on it. A combination of steps is necessary to run our server. You may have noticed the big red warning saying "do not do this in production, use WSGI instead.". That is what we'll do. To do this, we have to install a few more things:
 
 First, we need some system-wide build tools: 
 > sudo apt-get install build-essential python3-dev 
@@ -195,11 +195,12 @@ Then, we can install a production-ready Python server, uWSGI. This is a best-pra
 Now, you should be able to run the following command:
 > uwsgi --socket 127.0.0.1:5017 --wsgi-file main.py --callable app
 
-The output to terminal looks different, but you should now be running your Flask app on your server on port 5017, once again. Go to your virtual machine's public internet address in the browser, visible on the VM Instances overview page on the Google Cloud Console. Mine is http://34.159.224.162/. You won't see your API, unfortunately. Since HTTP uses port 80 as a standard, both our browser and Google's network settings expect us to be listening on port 80, not 5017. To remedy this, we'll use a webserver called nginx. Kill the process in your terminal again (ctrl+c). We're almost there. 
+The output to terminal looks different, but you should now be running your Flask app on your server on port 5017, once again. Go to your virtual machine's public internet address in the browser, visible on the VM Instances overview page on the Google Cloud Console. Mine is http://34.159.224.162/. You won't see your API, unfortunately, but you will see "This page isn't working": your server isn't yet responding. Since HTTP uses port 80 as a standard, both our browser and Google's network settings expect us to be requesting from and listening on port 80, not 5017. To remedy this, we'll use a webserver called nginx. Kill the process in your terminal again (ctrl+c). We're almost there. 
 
-We'll have to use the sudo command in front of everything we will do here to configure nginx. The software should be installed by default. Start by turning the server on: 
+Install nginx: 
+> sudo apt-get install nginx 
 
-> sudo systemctl start nginx
+We'll have to use the sudo command in front of everything we will do here to configure nginx. Once installed, the server should be running automatically.
 
 If you navigate to your computer's IP address in the browser, you should now be served the nginx default page. Now "all" we need to do is have nginx serve a response from our Flask app instead of it's default static HTML page. This repository contains a file, nginx.conf, which is a configuration file for nginx. 
 
@@ -209,7 +210,7 @@ Copy the config file into the folder where nginx looks for configs:
 
 Then link that configuration from the sites-enabled folder: 
 
-> ln -s /etc/nginx/sites-available/cloudvariations /etc/nginx/sites-enabled/cloudvariations
+> sudo ln -s /etc/nginx/sites-available/cloudvariations /etc/nginx/sites-enabled/cloudvariations
 
 Now we have to remove the default configuration which nginx shipped with: 
 
