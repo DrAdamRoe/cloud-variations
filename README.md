@@ -167,13 +167,7 @@ Once this has been created, you should see an overview of your VM Instances (the
 
 Now, we want to set this up to run our software. The next step is to SSH into your server. There are many ways to do this. Click on the "SSH" button to see options. "Open in Browser Window" will open a new browser window running a virtual terminal, giving you command-line access to your server. This is a fancy option which Google Cloud offers, and I would recommend trying it. You can also open this from your local command line (click on `view glcoud command` to see what you would type into your local terminal), or of course good old fashioned `ssh` from your local computer. Once in, poke around your computer a bit. The command `python3 --version` will show you that a version of Python is installed (I see 3.9.2, which is not the right version for us), and `which git` will return empty, showing that git is not installed. 
 
-
-
-Let's start by making sure everything we already have installed on our computer is up to date: 
-
-> sudo apt update && sudo apt upgrade 
-
- installing git and well as venv: 
+Let's start by installing git and well as venv: 
 
 > sudo apt-get install git python3-venv
  
