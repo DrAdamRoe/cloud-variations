@@ -9,13 +9,13 @@ Pull Requests are highly welcome, for example for corrections, clarifications, o
 1. [The Cloud Variations](#the-cloud-variations)
 1. [Local Installation and Operations](#Local-Installation-and-Operations)
 1. [Starting on the Cloud](#Starting-on-The-Cloud)
-1. [Prelude: Infrastructure-as-a-Service](#Variation-Infrastructure-as-a-Service)
+1. [Prelude: Infrastructure-as-a-Service](#Prelude-Infrastructure-as-a-Service)
 1. [Variation: Functions-as-a-Service](#Variation-Functions-as-a-Service)
 1. [Variation: Platform-as-a-Service](#Variation-Platform-as-a-Service)
 1. [Intermission: Containerize the Application](#Intermission-Containerize-the-Application)
 1. [Variation: Serverless Container Management](#Variation-Serverless-Container-Management)
 1. [Variation: Managed Kubernetes Cluster](#Variation-Managed-Kubernetes-Cluster)
-1. [Make This Your Own](#make-this-your-own)
+1. [Epilogue: Make This Your Own](#epilogue-make-this-your-own)
 
 ## Local Installation and Operations 
 The goal of this section is to install and run our little web server locally on your own computer, and get set up with the Google Cloud SDK and Account for the next steps. 
@@ -135,7 +135,7 @@ You should be able to now see your function running live on the internet now, at
 
 And there we have it: you can run a function on Google's Cloud without any concern for how to manage the server, just setting a few basic parameters.  
 
-## Variation: Infrastructure-as-a-Service 
+## Prelude: Infrastructure-as-a-Service 
 Next, we jump over to the lowest level approach available on the cloud: we will rent our own (virtual) computer, and set it up from scratch. This is, in a sense, the "old way" of doing things. Apart from buying server racks yourself, this is about as low-level as it usually gets. 
 
 Google Cloud's service for this is called Compute Engine. We will rent a computer from Google, and then do the rest ourselves. We will set this up via the browser-based console in order to get an idea for how to do it, but you of course also do this from the command line. Google Documentation can be found [here](https://cloud.google.com/python/docs/getting-started/getting-started-on-compute-engine), but the instructions below should work with our code and your setup. Hopefully. 
