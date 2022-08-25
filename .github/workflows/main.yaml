@@ -55,6 +55,7 @@ jobs:
         uses: google-github-actions/deploy-cloud-functions@main
         with:
           name: hello_cloud
+          entrypoint: api/hello_cloud.py
           runtime: python39
           region: europe-west3
           # auth: ${{ secrets.GCP_KEY }}      
