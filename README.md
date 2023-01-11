@@ -9,7 +9,7 @@ Pull Requests are highly welcome, for example for corrections, clarifications, o
 1. [The Cloud Variations](#the-cloud-variations)
 1. [Local Installation and Operations](#Local-Installation-and-Operations)
 1. [Starting on the Cloud](#Starting-on-The-Cloud)
-1. [Prelude: Infrastructure-as-a-Service](#Prelude-Infrastructure-as-a-Service)
+1. [Prelude: Infrastructure-as-a-Service](#Variation-Infrastructure-as-a-Service)
 1. [Variation: Functions-as-a-Service](#Variation-Functions-as-a-Service)
 1. [Variation: Platform-as-a-Service](#Variation-Platform-as-a-Service)
 1. [Intermission: Containerize the Application](#Intermission-Containerize-the-Application)
@@ -23,14 +23,15 @@ The goal of this section is to install and run our little web server locally on 
 ### Pre-Installed Requirements 
 Before you get started, you are expected to have some other software on your computer
 
-- Python 3.10 (tested with 3.10.6)
+<!-- maybe: upgrade to 3.11.1 -->
+- Python 3.10 (tested with 3.10.6) 
 - git 
-- [Google Cloud SDK](https://cloud.google.com/sdk/docs/quickstart), (tested with version 398.0.0)
+- [Google Cloud SDK](https://cloud.google.com/sdk/docs/quickstart), (tested with version 413.0.0)
 - An integrated development environment, like VS Code. 
 - [Docker](https://www.docker.com/products/docker-desktop) for building and running docker images locally
 
 ### Install Locally   
-- mkdir WORKING_DIR && cd WORKING_DIR, with a directory name of your choice (e.g. cloud2022). 
+- mkdir WORKING_DIR && cd WORKING_DIR, with a directory name of your choice (e.g. cloud2023). 
 - git clone this repository locally
 
 - Install a local python virtual environment with python 3.10 to work with, 
@@ -83,11 +84,11 @@ In GCP, a Project is the top-level organizational element. You can learn more ab
 
 Create a project on Google Cloud Platform: 
 
- `gcloud projects create cloud-variations-fs2022 --name="Cloud Variations"`
+ `gcloud projects create cloud-variations-ss2023 --name="Cloud Variations"`
 
 You should be able to see this in your dashboard on Google Cloud after a few seconds. Now, we're ready for our first deployment! You can also get information from the CLI using `describe`, e.g. 
 
-`gcloud projects describe cloud-variations-fs2022`
+`gcloud projects describe cloud-variations-ss2023`
 
 which will show information including status, name, and the projectId, which we will need in the next step. 
 
@@ -109,7 +110,7 @@ The goal is to associate the Education Credits you have received with this proje
 
 As of writing, there are [commands in the beta version of the gcloud SDK API](https://cloud.google.com/sdk/gcloud/reference/billing) which allow you to do this from the command line. First, use `gcloud beta billing accounts list` to get the ACCOUNT_ID of the account you want to use; if you are new to gCloud it should be the only account listed. The ID has a format like 0X0X0X-0X0X0X-0X0X0X. Then, link that billing account to your project, e.g. 
 
-`gcloud beta billing projects link cloud-variations-fs2022 --billing-account 0X0X0X-0X0X0X-0X0X0X`
+`gcloud beta billing projects link cloud-variations-ss2023 --billing-account 0X0X0X-0X0X0X-0X0X0X`
 
 Now you should be able to enable the cloud build API without running into errors: 
 
@@ -131,11 +132,11 @@ And now we will deploy a single _function_ from our application, the function `i
 
 This reads as: "Hey Google, deploy a Cloud Function for me called hello_cloud, which is both the name of the function that I've defined as well as the name that you'll use to identify the function. That function in the file api/hello_cloud.py. It should use the Python 3.10 runtime, anyone can access it on the internet without authentication, but only allow 2 instance to not run up my bill. Run the function if there is an HTTP request to the URL". 
 
-You should be able to now see your function running live on the internet now, at the url listed in the output of the command or in the console. It has a format like https://{Region}-{ProjectID}.cloudfunctions.net/{function-name}, in my case https://europe-west3-cloud-variations-fs2022.cloudfunctions.net/hello_cloud. 
+You should be able to now see your function running live on the internet now, at the url listed in the output of the command or in the console. It has a format like https://{Region}-{ProjectID}.cloudfunctions.net/{function-name}, in my case https://europe-west3-cloud-variations-ss2023.cloudfunctions.net/hello_cloud. 
 
 And there we have it: you can run a function on Google's Cloud without any concern for how to manage the server, just setting a few basic parameters.  
 
-## Prelude: Infrastructure-as-a-Service 
+## Variation: Infrastructure-as-a-Service 
 Next, we jump over to the lowest level approach available on the cloud: we will rent our own (virtual) computer, and set it up from scratch. This is, in a sense, the "old way" of doing things. Apart from buying server racks yourself, this is about as low-level as it usually gets. 
 
 Google Cloud's service for this is called Compute Engine. We will rent a computer from Google, and then do the rest ourselves. We will set this up via the browser-based console in order to get an idea for how to do it, but you of course also do this from the command line. Google Documentation can be found [here](https://cloud.google.com/python/docs/getting-started/getting-started-on-compute-engine), but the instructions below should work with our code and your setup. Hopefully. 
