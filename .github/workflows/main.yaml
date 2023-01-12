@@ -8,7 +8,7 @@ jobs:
     # we'll use that here since it's the most similar environment provided by GitHub.  
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Setup Python 3.9.x
         uses: actions/setup-python@v2
         with:
@@ -28,6 +28,8 @@ jobs:
     needs: build-and-test
     runs-on: ubuntu-20.04
     steps: 
+      - name: Checkout
+        uses: actions/checkout@v3        
       - name: Deploy to Google App Engine
         id: deploy-gae
         uses: google-github-actions/deploy-appengine@v1
@@ -42,7 +44,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps: 
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Authorize for Functions
         id: 'auth'
         uses: 'google-github-actions/auth@v0'
@@ -65,7 +67,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Setup Cloud SDK
         uses: google-github-actions/setup-gcloud@v0.2.1
@@ -85,7 +87,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps: 
       - name: Checkout
-        uses: actions/checkout@v2        
+        uses: actions/checkout@v3        
       - name: Deploy to Google Cloud Run
         id: deploy-run
         uses: google-github-actions/deploy-cloudrun@main
