@@ -50,11 +50,10 @@ jobs:
     steps: 
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Authorize for Functions
-        id: 'auth'
-        uses: 'google-github-actions/auth@v0'
-        with:
-            credentials_json: '${{ secrets.GCP_KEY }}'        
+      - name: Authorize GCP
+        uses: 'google-github-actions/auth@v1'
+        with: 
+          credentials_json: ${{ secrets.JSON_CREDENTIALS_SS2023 }}  
       - name: Deploy to Google Cloud Functions
         id: deploy-functions
         uses: google-github-actions/deploy-cloud-functions@v1
