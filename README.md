@@ -94,7 +94,7 @@ which will show information including status, name, and the projectId, which we 
 
 Once creating this project, set your local environment to default to using that new project: 
 
-`gcloud config set project cloud-variations-fs2022`
+`gcloud config set project cloud-variations-ss2023`
 
 This ensures that it will not conflict with any other projects you may have on GCP.
 
@@ -243,13 +243,13 @@ In this variation, we will use Google's Platform-as-Service offering, Google App
 
 Create an instance of an App, either from the CLI or through the dashboard. Be sure to get the projectId from the previous step: 
 
-`gcloud app create --project=cloud-variations-fs2022 --region=europe-west3`
+`gcloud app create --project=cloud-variations-ss2023 --region=europe-west3`
 
 again, you can check it's status at the CLI or the dashboard: 
 
-`gcloud app describe --project=cloud-variations-fs2022`
+`gcloud app describe --project=cloud-variations-ss2023`
 
-Note that at this stage, you have created an "application", but there is nothing being served yet. You will automatically have a custom URL for this project, which has the format PROJECT_ID.appspot.com, in my case https://cloud-variations-fs2022.appspot.com. If you navigate to your own URL, you will get a 404: there is nothing being served there yet. 
+Note that at this stage, you have created an "application", but there is nothing being served yet. You will automatically have a custom URL for this project, which has the format PROJECT_ID.appspot.com, in my case https://cloud-variations-ss2023.appspot.com. If you navigate to your own URL, you will get a 404: there is nothing being served there yet. 
 
 Now, we can deploy our app! The application configuration is entirely described in a single file, called `app-engine.yaml`. To deploy, we will tell app engine to use the configuration we have detailed in that file: 
 
@@ -270,6 +270,8 @@ To start, build a Docker image, based on the Dockerfile provided for you in this
 and run it locally: 
 
 `docker run --publish 5017:5022 hello-cloud`
+
+Note that if you are on a Mac with an ARM processor, such as an M1 or M2 MacBook Pro, the container you build with the above command will not run on more standard x86 Intel processors, which are found, for example, on the cloud. So much for Docker's old sloagn "Build Once, Run Anywhere". To resolve this, build your docker container with the additional flag `--platform linux/amd64` if you are on an ARM Mac. You'll get a warning when running that image locally, but the same container will then work both locally and on the cloud (it will not be very efficient locally, but that is fine for this tutorial).
 
 At this point, you should be able to again make a request locally, via `curl localhost:5017` or by going to the browser. 
 
@@ -293,13 +295,13 @@ Next, create a repository in the Artifact Registry for you to store your image i
 
 Note that the format "Docker" specifies that what type of artifact the repository should expect, a Docker Image. 
 
-Now you can tag your local image to push to a specific location, telling Docker where you will push it: to the repository you just created. You should replace `cloud-variations-fs2022` with your project name: 
+Now you can tag your local image to push to a specific location, telling Docker where you will push it: to the repository you just created. You should replace `cloud-variations-ss2023` with your project name: 
 
-`docker tag hello-cloud:latest europe-west3-docker.pkg.dev/cloud-variations-fs2022/hello-cloud/hello-cloud:latest`
+`docker tag hello-cloud:latest europe-west3-docker.pkg.dev/cloud-variations-ss2023/hello-cloud/hello-cloud:latest`
 
 And finally, push it to Google's Artifact Repository: 
 
-`docker push europe-west3-docker.pkg.dev/cloud-variations-fs2022/hello-cloud/hello-cloud:latest`
+`docker push europe-west3-docker.pkg.dev/cloud-variations-ss2023/hello-cloud/hello-cloud:latest`
 
 Phew. We've built a Docker image locally and pushed it to Google Cloud. You can see the fruits of your labors (and browse the directory structure) over on the dashboard at https://console.cloud.google.com/gcr/images/{your-project-name}. 
 
@@ -313,7 +315,7 @@ First, enable the Google Cloud Run API:
 
 Then, we will create and deploy our new _service_, which will tell Cloud Run to run between 2 and 5 instances of our container based on the image we have built and pushed already. 
 
-`gcloud run deploy hello-cloud-run --image=europe-west3-docker.pkg.dev/cloud-variations-fs2022/hello-cloud/hello-cloud:latest --port=5022 --region=europe-west3 --allow-unauthenticated --min-instances=2 --max-instances=5`
+`gcloud run deploy hello-cloud-run --image=europe-west3-docker.pkg.dev/cloud-variations-ss2023/hello-cloud/hello-cloud:latest --port=5022 --region=europe-west3 --allow-unauthenticated --min-instances=2 --max-instances=5`
 
 This command should feel a bit like the one we used for the FaaS offering at the start, but with a bit more control. If your container runs locally but not on google cloud, you may need to change the build architecture. Have a look at the troubleshooting section below. 
 
@@ -342,6 +344,10 @@ Enable the Google Kubernetes Engine API:
 
 `gcloud services enable container.googleapis.com`
 
+and install the authentication plugin for kubectl, which you can read about [here](https://cloud.google.com/blog/products/containers-kubernetes/kubectl-auth-changes-in-gke) if you are into kubernetes: 
+
+`gcloud components install gke-gcloud-auth-plugin`
+
 Now we can create a Kubernetes cluster: 
 
 `gcloud container clusters create hello-cloud-cluster --num-nodes=1`
@@ -354,15 +360,11 @@ and try again to create the cluster with the above command. Now you should get a
 
 And now we are ready to interact with our Kubernetes cluster!
 
-Use the gcloud-provided tool to configure your kubectl on your machine for interacting with your cluster on gcloud: 
-
-`gcloud container clusters get-credentials hello-cloud-cluster`
-
 Now, try to find out a bit about your cluster using `kubectl describe`, for example `kubectl describe nodes`, which will show a whole lot of hard to understand information about your kubernetes cluster. 
 
 Create a _deployment_ based on our Docker image, effectively declaring that we want our Docker image to run in Kubernetes:
 
-`kubectl create deployment hello-cloud-server --image=europe-west3-docker.pkg.dev/cloud-variations-fs2022/hello-cloud/hello-cloud:latest`
+`kubectl create deployment hello-cloud-server --image=europe-west3-docker.pkg.dev/cloud-variations-ss2023/hello-cloud/hello-cloud:latest`
 
 Once you have run this, it is running already, but we have to expose it on the network to see it, mapping our local port 5022 to the public port 80 for HTTP: 
 
