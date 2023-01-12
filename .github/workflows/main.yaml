@@ -72,11 +72,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+      - name: Authorize GCP
+        uses: 'google-github-actions/auth@v1'
+        with: 
+          credentials_json: ${{ secrets.JSON_CREDENTIALS_SS2023 }}  
       - name: Setup Cloud SDK
         uses: google-github-actions/setup-gcloud@v1
-        with:
-          service_account_key: ${{ secrets.GCP_KEY }} 
-          export_default_credentials: true 
+        #with:
+        #  service_account_key: ${{ secrets.GCP_KEY }} 
+        #  export_default_credentials: true 
 
       - name: Authorize Docker push
         run: gcloud auth configure-docker europe-west3-docker.pkg.dev
@@ -90,7 +94,11 @@ jobs:
     runs-on: ubuntu-20.04
     steps: 
       - name: Checkout
-        uses: actions/checkout@v3        
+        uses: actions/checkout@v3
+      - name: Authorize GCP
+        uses: 'google-github-actions/auth@v1'
+        with: 
+          credentials_json: ${{ secrets.JSON_CREDENTIALS_SS2023 }}        
       - name: Deploy to Google Cloud Run
         id: deploy-run
         uses: google-github-actions/deploy-cloudrun@v1
@@ -99,7 +107,7 @@ jobs:
           image: europe-west3-docker.pkg.dev/cloud-variations-ss2023/hello-cloud/hello-cloud:latest
           region: europe-west3
           flags: --port=5022 --allow-unauthenticated 
-          credentials: ${{ secrets.GCP_KEY }}      
+          #credentials: ${{ secrets.GCP_KEY }}      
       - name: Test Google Cloud Functions deployment 
         run: curl "${{ steps.deploy-run.outputs.url }}"
 
