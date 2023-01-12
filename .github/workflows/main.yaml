@@ -28,11 +28,9 @@ jobs:
     needs: build-and-test
     runs-on: ubuntu-20.04
     steps: 
-      - name: Checkout
-        uses: actions/checkout@v2        
       - name: Deploy to Google App Engine
         id: deploy-gae
-        uses: google-github-actions/deploy-appengine@main
+        uses: google-github-actions/deploy-appengine@v1
         with:
           deliverables: app-engine.yaml
           credentials: ${{ secrets.GCP_KEY }}      
