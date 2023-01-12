@@ -171,8 +171,8 @@ Now, we want to set this up to run our software. The next step is to SSH into yo
 Let's start by installing git and well as venv: 
 
 > sudo apt-get install git python3-venv
- 
-and then cloning this very repository to your new server: 
+
+Not that this step may take a while. Once it is done, clone this very repository to your new server: 
 
 > git clone https://github.com/DrAdamRoe/cloud-variations.git
 
@@ -184,14 +184,14 @@ Now, you should be able to run your app. Expose it on port 5017:
 
 Your flask app is now running on a computer in the cloud, but it is not accessible on the internet yet. The port we are running on, 5017, is not a standard port. Use ctrl+c to kill the process. 
 
-What we will do next is set up our environment to run a web server on the public internet. So far, we have a Debian Linux operating system running on Google Cloud's infrastructure, and we have our code on it. A combination of steps is necessary to run our server. You may have noticed the big red warning saying "do not do this in production, use WSGI instead.". That is what we'll do. To do this, we have to install a few more things:
+What we will do next is set up our environment to run a web server on the public internet. So far, we have a Debian Linux operating system running on Google Cloud's infrastructure, and we have our code on it, which we are able to run. A combination of steps is necessary to run our server. You may have noticed the big red warning saying "do not do this in production, use WSGI instead.". That is what we'll do. To do this, we have to install a few more things:
 
 First, we need some system-wide build tools: 
 > sudo apt-get install build-essential python3-dev 
 
 Then, we can install a production-ready Python server, uWSGI. This is a best-practice, and it is enforced by the security practices on the infrastructure we have rented and set up so far. 
 
-> pip install --version uWSGI==2.0.20
+> pip install --version uWSGI==2.0.21
 
 Now, you should be able to run the following command:
 > uwsgi --socket 127.0.0.1:5017 --wsgi-file main.py --callable app
