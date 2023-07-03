@@ -1,21 +1,10 @@
-import json
-import unittest
+from fastapi.testclient import TestClient
 
 from api.api import app
-from api.hello_cloud import hello_cloud
 
+test_client = TestClient(app)
 
-class Test(unittest.TestCase):
-    def test_api(self):
-        with app.test_client() as test_client:
-
-            response = test_client.get('/')
-
-            assert response.status_code == 200
-
-            json_data = json.loads(response.data)
-
-            assert "message" in json_data
-
-if __name__ == "__main__":
-    unittest.main()
+def test_api_response():
+    response = test_client.get('/')
+    assert response.status_code == 200
+    assert "message" in response.json()

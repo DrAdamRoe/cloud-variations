@@ -1,14 +1,9 @@
-from flask import Flask, request
+from fastapi import FastAPI
 
 from api.hello_cloud import hello_cloud
 
+app = FastAPI()
 
-app = Flask(__name__)
-
-@app.route('/')
+@app.get('/')
 def index():
-    return hello_cloud(request)
-
-
-if __name__ == "__main__":
-    app.run(host="localhost", port=8080, debug=True)
+    return hello_cloud()

@@ -1,5 +1,3 @@
-from flask import jsonify
-
-def hello_cloud(request):
+def hello_cloud():
     data = {"message": "Hello, Cloud!"}
-    return jsonify(data)
+    return data

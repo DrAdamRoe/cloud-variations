@@ -23,7 +23,6 @@ The goal of this section is to install and run our little web server locally on 
 ### Pre-Installed Requirements 
 Before you get started, you are expected to have some other software on your computer
 
-<!-- maybe: upgrade to 3.11.1 -->
 - Python 3.10 (tested with 3.10.6) 
 - git 
 - [Google Cloud SDK](https://cloud.google.com/sdk/docs/quickstart), (tested with version 413.0.0)
@@ -48,23 +47,11 @@ Before you get started, you are expected to have some other software on your com
 
 - Install packages: `pip install -r requirements.txt`
 
+- run your FastAPI application: `uvicorn main:app --port 5017`
 
-- Point Flask to your application: 
-
-    macOS/Linux:  `export FLASK_APP=main.py`
-    
-    Windows: `set FLASK_APP=main.py`
-
-- run your flask application: 
-
-    `flask run --port=5017`
+- Run your tests: `pytest`
 
 Once you are running, you should be able to see a JSON response in the browser by navigating to http://localhost:5017 or by using cURL to GET a response, e.g. `curl localhost:5017`. You should now be able to see our message, `{"message": "Hello, Cloud!"}`, served locally.  
-
-### Restarting your Local Development Environment
-
-Note that every time you re-open your local development environment, you will have to navigate to your local directory, activate the virtual environment, and set the FLASK_APP environment variable in order to start flask 
- 
 
 ## Starting on The Cloud
 
@@ -176,18 +163,20 @@ Not that this step may take a while. Once it is done, clone this very repository
 
 > git clone https://github.com/DrAdamRoe/cloud-variations.git
 
-At this stage, you should be able to setup and run python using the same commands as you did locally (using the Linux/macOS instructions above): create a virtual environment, activate it, install requirements, and set FLASK_APP environment variable.
+At this stage, you should be able to setup and run python using the same commands as you did locally (using the Linux/macOS instructions above): create a virtual environment, activate it, and install requirements.
 
 Now, you should be able to run your app. Expose it on port 5017:
 
-> flask run --port=5017
+> uvicorn main:app --port 5017
 
-Your flask app is now running on a computer in the cloud, but it is not accessible on the internet yet. The port we are running on, 5017, is not a standard port. Use ctrl+c to kill the process. 
+Your FastAPI app is now running on a computer in the cloud, but it is not accessible on the internet yet. The port we are running on, 5017, is not a standard port. Use ctrl+c to kill the process. 
 
 What we will do next is set up our environment to run a web server on the public internet. So far, we have a Debian Linux operating system running on Google Cloud's infrastructure, and we have our code on it, which we are able to run. A combination of steps is necessary to run our server. You may have noticed the big red warning saying "do not do this in production, use WSGI instead.". That is what we'll do. To do this, we have to install a few more things:
 
 First, we need some system-wide build tools: 
 > sudo apt-get install build-essential python3-dev 
+
+### UPDATE for FastAPI
 
 Then, we can install a production-ready Python server, uWSGI. This is a best-practice, and it is enforced by the security practices on the infrastructure we have rented and set up so far. 
 
@@ -425,10 +414,6 @@ This monstrous command is really two in one. The inner command, within backticks
 If you can't deploy your container to Google Cloud Run, you might see an error like this: 
 
 >ERROR: (gcloud.run.deploy) Cloud Run error: Container failed to start. Failed to start and then listen on the port defined by the PORT environment variable. Logs for this revision might contain more information. 
-
-and upon looking at the logs, you may see something like: 
-
-> terminated: Application failed to start: Failed to create init process: failed to load /usr/local/bin/flask: exec format error 
 
 The issue is probably that your own computer's processor uses a different architecture than the one on Google Cloud, in particular if you are using a newer Mac using an ARM architecture (M1). To resolve this, you'll have to build an image for a different architecture than on your computer. The process is documented [here](https://docs.docker.com/desktop/multi-arch/). 
 
