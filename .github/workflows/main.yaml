@@ -81,8 +81,8 @@ jobs:
 
       - name: Build and Push Container
         run: |
-          docker build --tag europe-west3-docker.pkg.dev/cloud-variations-ss2023/hello-cloud/hello-cloud:latest .
-          docker push europe-west3-docker.pkg.dev/cloud-variations-ss2023/hello-cloud/hello-cloud:latest
+          docker build --tag europe-west3-docker.pkg.dev/cloud-variations-fs2023-test/hello-cloud/hello-cloud:latest .
+          docker push europe-west3-docker.pkg.dev/cloud-variations-fs2023-test/hello-cloud/hello-cloud:latest
   test-run:
     needs: build-container
     runs-on: ubuntu-20.04
@@ -98,7 +98,7 @@ jobs:
         uses: google-github-actions/deploy-cloudrun@v1
         with:
           service: hello-cloud-run
-          image: europe-west3-docker.pkg.dev/cloud-variations-ss2023/hello-cloud/hello-cloud:latest
+          image: europe-west3-docker.pkg.dev/cloud-variations-fs2023-test/hello-cloud/hello-cloud:latest
           region: europe-west3
           flags: --port=5022 --allow-unauthenticated 
       - name: Test Google Cloud Functions deployment 

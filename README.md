@@ -1,7 +1,7 @@
 
 # The Cloud Variations 
 
-This repository represents multiple ways to run a very simple server application on The Cloud. The goal is to get a feeling for different ways of operating (running) this simple application. The app itself is a hello world REST API with a JSON response, written in Python using Flask. The app itself is irrelevant, the ways of running it are the interested part. This repository accompanies a class at CODE University of Applied Sciences, last taught in Autumn 2022. 
+This repository represents multiple ways to run a very simple server application on The Cloud. The goal is to get a feeling for different ways of operating (running) this simple application. The app itself is a hello world REST API with a JSON response, written in Python using Flask. The app itself is irrelevant, the ways of running it are the interested part. This repository accompanies a class at CODE University of Applied Sciences, last taught in Autumn 2023. 
 
 Pull Requests are highly welcome, for example for corrections, clarifications, or maintenance. 
 
@@ -84,17 +84,17 @@ In GCP, a Project is the top-level organizational element. You can learn more ab
 
 Create a project on Google Cloud Platform: 
 
- `gcloud projects create cloud-variations-ss2023 --name="Cloud Variations"`
+ `gcloud projects create cloud-variations-fs2023-test --name="Cloud Variations"`
 
 You should be able to see this in your dashboard on Google Cloud after a few seconds. Now, we're ready for our first deployment! You can also get information from the CLI using `describe`, e.g. 
 
-`gcloud projects describe cloud-variations-ss2023`
+`gcloud projects describe cloud-variations-fs2023-test`
 
 which will show information including status, name, and the projectId, which we will need in the next step. 
 
 Once creating this project, set your local environment to default to using that new project: 
 
-`gcloud config set project cloud-variations-ss2023`
+`gcloud config set project cloud-variations-fs2023-test`
 
 This ensures that it will not conflict with any other projects you may have on GCP.
 
@@ -110,7 +110,7 @@ The goal is to associate the Education Credits you have received with this proje
 
 As of writing, there are [commands in the beta version of the gcloud SDK API](https://cloud.google.com/sdk/gcloud/reference/billing) which allow you to do this from the command line. First, use `gcloud beta billing accounts list` to get the ACCOUNT_ID of the account you want to use; if you are new to gCloud it should be the only account listed. The ID has a format like 0X0X0X-0X0X0X-0X0X0X. Then, link that billing account to your project, e.g. 
 
-`gcloud beta billing projects link cloud-variations-ss2023 --billing-account 0X0X0X-0X0X0X-0X0X0X`
+`gcloud beta billing projects link cloud-variations-fs2023-test --billing-account 0X0X0X-0X0X0X-0X0X0X`
 
 Now you should be able to enable the cloud build API without running into errors: 
 
@@ -132,7 +132,7 @@ And now we will deploy a single _function_ from our application, the function `i
 
 This reads as: "Hey Google, deploy a Cloud Function for me called hello_cloud, which is both the name of the function that I've defined as well as the name that you'll use to identify the function. That function in the file api/hello_cloud.py. It should use the Python 3.10 runtime, anyone can access it on the internet without authentication, but only allow 2 instance to not run up my bill. Run the function if there is an HTTP request to the URL". 
 
-You should be able to now see your function running live on the internet now, at the url listed in the output of the command or in the console. It has a format like https://{Region}-{ProjectID}.cloudfunctions.net/{function-name}, in my case https://europe-west3-cloud-variations-ss2023.cloudfunctions.net/hello_cloud. 
+You should be able to now see your function running live on the internet now, at the url listed in the output of the command or in the console. It has a format like https://{Region}-{ProjectID}.cloudfunctions.net/{function-name}, in my case https://europe-west3-cloud-variations-fs2023-test.cloudfunctions.net/hello_cloud. 
 
 And there we have it: you can run a function on Google's Cloud without any concern for how to manage the server, just setting a few basic parameters.  
 
@@ -243,13 +243,13 @@ In this variation, we will use Google's Platform-as-Service offering, Google App
 
 Create an instance of an App, either from the CLI or through the dashboard. Be sure to get the projectId from the previous step: 
 
-`gcloud app create --project=cloud-variations-ss2023 --region=europe-west3`
+`gcloud app create --project=cloud-variations-fs2023-test --region=europe-west3`
 
 again, you can check it's status at the CLI or the dashboard: 
 
-`gcloud app describe --project=cloud-variations-ss2023`
+`gcloud app describe --project=cloud-variations-fs2023-test`
 
-Note that at this stage, you have created an "application", but there is nothing being served yet. You will automatically have a custom URL for this project, which has the format PROJECT_ID.appspot.com, in my case https://cloud-variations-ss2023.appspot.com. If you navigate to your own URL, you will get a 404: there is nothing being served there yet. 
+Note that at this stage, you have created an "application", but there is nothing being served yet. You will automatically have a custom URL for this project, which has the format PROJECT_ID.appspot.com, in my case https://cloud-variations-fs2023-test.appspot.com. If you navigate to your own URL, you will get a 404: there is nothing being served there yet. 
 
 Now, we can deploy our app! The application configuration is entirely described in a single file, called `app-engine.yaml`. To deploy, we will tell app engine to use the configuration we have detailed in that file: 
 
@@ -295,13 +295,13 @@ Next, create a repository in the Artifact Registry for you to store your image i
 
 Note that the format "Docker" specifies that what type of artifact the repository should expect, a Docker Image. 
 
-Now you can tag your local image to push to a specific location, telling Docker where you will push it: to the repository you just created. You should replace `cloud-variations-ss2023` with your project name: 
+Now you can tag your local image to push to a specific location, telling Docker where you will push it: to the repository you just created. You should replace `cloud-variations-fs2023-test` with your project name: 
 
-`docker tag hello-cloud:latest europe-west3-docker.pkg.dev/cloud-variations-ss2023/hello-cloud/hello-cloud:latest`
+`docker tag hello-cloud:latest europe-west3-docker.pkg.dev/cloud-variations-fs2023-test/hello-cloud/hello-cloud:latest`
 
 And finally, push it to Google's Artifact Repository: 
 
-`docker push europe-west3-docker.pkg.dev/cloud-variations-ss2023/hello-cloud/hello-cloud:latest`
+`docker push europe-west3-docker.pkg.dev/cloud-variations-fs2023-test/hello-cloud/hello-cloud:latest`
 
 Phew. We've built a Docker image locally and pushed it to Google Cloud. You can see the fruits of your labors (and browse the directory structure) over on the dashboard at https://console.cloud.google.com/gcr/images/{your-project-name}. 
 
@@ -315,7 +315,7 @@ First, enable the Google Cloud Run API:
 
 Then, we will create and deploy our new _service_, which will tell Cloud Run to run between 2 and 5 instances of our container based on the image we have built and pushed already. 
 
-`gcloud run deploy hello-cloud-run --image=europe-west3-docker.pkg.dev/cloud-variations-ss2023/hello-cloud/hello-cloud:latest --port=5022 --region=europe-west3 --allow-unauthenticated --min-instances=2 --max-instances=5`
+`gcloud run deploy hello-cloud-run --image=europe-west3-docker.pkg.dev/cloud-variations-fs2023-test/hello-cloud/hello-cloud:latest --port=5022 --region=europe-west3 --allow-unauthenticated --min-instances=2 --max-instances=5`
 
 This command should feel a bit like the one we used for the FaaS offering at the start, but with a bit more control. If your container runs locally but not on google cloud, you may need to change the build architecture. Have a look at the troubleshooting section below. 
 
@@ -364,7 +364,7 @@ Now, try to find out a bit about your cluster using `kubectl describe`, for exam
 
 Create a _deployment_ based on our Docker image, effectively declaring that we want our Docker image to run in Kubernetes:
 
-`kubectl create deployment hello-cloud-server --image=europe-west3-docker.pkg.dev/cloud-variations-ss2023/hello-cloud/hello-cloud:latest`
+`kubectl create deployment hello-cloud-server --image=europe-west3-docker.pkg.dev/cloud-variations-fs2023-test/hello-cloud/hello-cloud:latest`
 
 Once you have run this, it is running already, but we have to expose it on the network to see it, mapping our local port 5022 to the public port 80 for HTTP: 
 
