@@ -39,8 +39,13 @@ jobs:
         uses: google-github-actions/deploy-appengine@v1
         with:
           deliverables: app-engine.yaml
-      - name: Test Google App Engine deployment 
-        if: $!{{ contains(curl "${{ steps.deploy-gae.outputs.url }}", 'Hello, Cloud!') }}
+      - name: Get response from Google App Engine deployment 
+        run: |
+            GAE_CURL_RESPONSE = curl "${{ steps.deploy-gae.outputs.url }}"
+            echo $GAE_CURL_RESPONSE
+            echo "GAE_CURL_RESPONSE=$GAE_CURL_RESPONSE" >> $GITHUB_ENV
+      - name: Check response from Google App Engine deployment 
+        if: $!{{ contains(env.GAE_CURL_RESPONSE, 'Hello, Cloud!') }}
         run: exit 1
         
        
