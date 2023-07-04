@@ -1,7 +1,11 @@
 
 # The Cloud Variations 
 
-This repository represents multiple ways to run a very simple server application on The Cloud. The goal is to get a feeling for different ways of operating (running) this simple application. The app itself is a hello world REST API with a JSON response, written in Python using Flask. The app itself is irrelevant, the ways of running it are the interested part. This repository accompanies a class at CODE University of Applied Sciences, last taught in Autumn 2023. 
+This repository represents multiple ways to run a very simple server application on The Cloud. The goal is to get a feeling for different ways of operating (running) this simple application. Basically, we are going to work out way through this:
+
+![Where should I run my stuff?](./documentation/where_should_you_run_your_workload_gcp.jpg)*Where Should I Run my stuff? Graphic from the [Google Cloud Developer Blog](https://cloud.google.com/blog/topics/developers-practitioners/where-should-i-run-my-stuff-choosing-google-cloud-compute-option)*. 
+
+The app itself is a hello world REST API with a JSON response, written in Python using Flask. The app itself is irrelevant, the ways of running it are the interested part. This repository accompanies a class at CODE University of Applied Sciences, last taught in Autumn 2023. 
 
 Pull Requests are highly welcome, for example for corrections, clarifications, or maintenance. 
 
