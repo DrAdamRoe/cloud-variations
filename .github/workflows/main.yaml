@@ -41,6 +41,7 @@ jobs:
           deliverables: app-engine.yaml
       - name: Get response from Google App Engine deployment 
         run: |
+            curl "${{ steps.deploy-gae.outputs.url }}"
             echo -n GAE_CURL_RESPONSE= >> $GITHUB_ENV
             curl "${{ steps.deploy-gae.outputs.url }}" >> $GITHUB_ENV
       - name: Check response from Google App Engine deployment 
@@ -67,8 +68,15 @@ jobs:
           build_environment_variables: GOOGLE_FUNCTION_SOURCE=api/hello_cloud.py
           runtime: python39
           region: europe-west3
-      - name: Test Google Cloud Functions deployment 
-        run: curl "${{ steps.deploy-functions.outputs.url }}"
+      - name: Get response from Google Cloud Functions deployment 
+        run: |
+            curl "${{ steps.deploy-functions.outputs.url }}"
+            echo -n GCF_CURL_RESPONSE= >> $GITHUB_ENV
+            curl "${{ steps.deploy-functions.outputs.url }}" >> $GITHUB_ENV
+      - name: Check response from Google Cloud Functions deployment 
+        if: ${{ !contains(env.GCF_CURL_RESPONSE, 'Hello, Cloud') }}
+        run: exit 1
+
 # job to test against Cloud Run
   build-container: 
     needs: build-and-test
@@ -106,9 +114,15 @@ jobs:
           service: hello-cloud-run
           image: europe-west3-docker.pkg.dev/cloud-variations-fs2023-test/hello-cloud/hello-cloud:latest
           region: europe-west3
-          flags: --port=5022 --allow-unauthenticated 
-      - name: Test Google Cloud Functions deployment 
-        run: curl "${{ steps.deploy-run.outputs.url }}"
+          flags: --port=5022 --allow-unauthenticated
+      - name: Get response from Google Cloud Run deployment 
+        run: |
+            curl "${{ steps.deploy-run.outputs.url }}"
+            echo -n GCR_CURL_RESPONSE= >> $GITHUB_ENV
+            curl "${{ steps.deploy-run.outputs.url }}" >> $GITHUB_ENV
+      - name: Check response from Google Cloud Run deployment 
+        if: ${{ !contains(env.GCR_CURL_RESPONSE, 'Hello, Cloud') }}
+        run: exit 1
 
 #### to start a new project/semester: 
 # - update project names in this file 
