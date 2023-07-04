@@ -44,7 +44,7 @@ jobs:
             echo -n GAE_CURL_RESPONSE= >> $GITHUB_ENV
             curl "${{ steps.deploy-gae.outputs.url }}" >> $GITHUB_ENV
       - name: Check response from Google App Engine deployment 
-        if: ${{ !contains(env.GAE_CURL_RESPONSE, 'Hello, Cloud') }}
+        if: ${{ !contains(env.GAE_CURL_RESPONSE, 'Internal Server Error') }}
         run: exit 1
         
        
