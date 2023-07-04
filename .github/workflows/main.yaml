@@ -41,7 +41,7 @@ jobs:
           deliverables: app-engine.yaml
       - name: Get response from Google App Engine deployment 
         run: |
-            GAE_CURL_RESPONSE = "${{ curl steps.deploy-gae.outputs.url }}"
+            curl "${{ steps.deploy-gae.outputs.url }}" 
             echo $GAE_CURL_RESPONSE
             echo "GAE_CURL_RESPONSE=$GAE_CURL_RESPONSE" >> $GITHUB_ENV
       - name: Check response from Google App Engine deployment 
