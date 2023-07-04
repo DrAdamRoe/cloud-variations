@@ -34,14 +34,16 @@ jobs:
         uses: 'google-github-actions/auth@v1'
         with: 
             credentials_json: ${{ secrets.JSON_CREDENTIALS_fs2023_test }}  
-
       - name: Deploy to Google App Engine
         id: deploy-gae
         uses: google-github-actions/deploy-appengine@v1
         with:
-          deliverables: app-engine.yaml  
+          deliverables: app-engine.yaml
       - name: Test Google App Engine deployment 
-        run: curl "${{ steps.deploy-gae.outputs.url }}"
+        if: $!{{ contains(curl "${{ steps.deploy-gae.outputs.url }}", 'Hello, Cloud!') }}
+        run: exit 1
+        
+       
 # job to test against Functions 
   test-functions:
     needs: build-and-test
