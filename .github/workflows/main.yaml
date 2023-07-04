@@ -109,3 +109,5 @@ jobs:
 # - download JSON credentials for default app engine service account, upload to GitHub
 # - enable app engine admin and cloud run admin apis: 
 #     gcloud services enable appengine.googleapis.com cloudbuild.googleapis.com
+# - add run admin role to project: 
+#     gcloud projects add-iam-policy-binding cloud-variations-fs2023-test --member=serviceAccount:cloud-variations-fs2023-test@appspot.gserviceaccount.com --role=roles/run.admin
