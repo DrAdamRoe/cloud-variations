@@ -45,7 +45,7 @@ jobs:
             echo $GAE_CURL_RESPONSE
             echo "GAE_CURL_RESPONSE=$GAE_CURL_RESPONSE" >> $GITHUB_ENV
       - name: Check response from Google App Engine deployment 
-        if: $!{{ contains(env.GAE_CURL_RESPONSE, 'Hello, Cloud!') }}
+        if: ${{ !contains(env.GAE_CURL_RESPONSE, 'Hello, Cloud') }}
         run: exit 1
         
        
