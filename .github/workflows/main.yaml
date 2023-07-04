@@ -33,7 +33,7 @@ jobs:
       - name: Authorize GCP
         uses: 'google-github-actions/auth@v1'
         with: 
-            credentials_json: ${{ secrets.JSON_CREDENTIALS_SS2023 }}  
+            credentials_json: ${{ secrets.JSON_CREDENTIALS_fs2023_test }}  
 
       - name: Deploy to Google App Engine
         id: deploy-gae
@@ -52,7 +52,7 @@ jobs:
       - name: Authorize GCP
         uses: 'google-github-actions/auth@v1'
         with: 
-          credentials_json: ${{ secrets.JSON_CREDENTIALS_SS2023 }}  
+          credentials_json: ${{ secrets.JSON_CREDENTIALS_fs2023_test }}  
       - name: Deploy to Google Cloud Functions
         id: deploy-functions
         uses: google-github-actions/deploy-cloud-functions@v1
@@ -73,7 +73,7 @@ jobs:
       - name: Authorize GCP
         uses: 'google-github-actions/auth@v1'
         with: 
-          credentials_json: ${{ secrets.JSON_CREDENTIALS_SS2023 }}  
+          credentials_json: ${{ secrets.JSON_CREDENTIALS_fs2023_test }}  
       - name: Setup Cloud SDK
         uses: google-github-actions/setup-gcloud@v1
       - name: Authorize Docker push
@@ -92,7 +92,7 @@ jobs:
       - name: Authorize GCP
         uses: 'google-github-actions/auth@v1'
         with: 
-          credentials_json: ${{ secrets.JSON_CREDENTIALS_SS2023 }}        
+          credentials_json: ${{ secrets.JSON_CREDENTIALS_fs2023_test }}        
       - name: Deploy to Google Cloud Run
         id: deploy-run
         uses: google-github-actions/deploy-cloudrun@v1
@@ -104,3 +104,10 @@ jobs:
       - name: Test Google Cloud Functions deployment 
         run: curl "${{ steps.deploy-run.outputs.url }}"
 
+#### to start a new project/semester: 
+# - update project names in this file 
+# - download JSON credentials for default app engine service account, upload to GitHub
+# - enable app engine admin and cloud run admin apis: 
+#     gcloud services enable appengine.googleapis.com cloudbuild.googleapis.com
+# - add run admin role to project: 
+#     gcloud projects add-iam-policy-binding cloud-variations-fs2023-test --member=serviceAccount:cloud-variations-fs2023-test@appspot.gserviceaccount.com --role=roles/run.admin
