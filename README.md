@@ -255,6 +255,8 @@ Now, we can deploy our app! The application configuration is entirely described 
 
 `gcloud app deploy app-engine.yaml`
 
+If you are asked for a location, choose `europe-west3` (Frankfurt), which is number 13. 
+
 And there we have it: your app is deployed! Look at that yaml file and see what we need to describe the infrastructure: a runtime (Python version), an instance class (the size of the VM we will us, in this case, [F1](https://cloud.google.com/appengine/docs/standard), with 256 MB of RAM), and some routing rules - similar to what we would need to define for a web server application like nginx, Caddy, or Apache. This tells app engine to respond to any request with the response of our application (as opposed to a redirect request, serving a static file, or an error, for instance. In this variation, we are able to specify resources (like the compute instance size), but still are not concerned with things like the underlying operating system. 
 
 ## Intermission: Containerize the Application
