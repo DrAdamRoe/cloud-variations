@@ -4,9 +4,7 @@ on: [push]
 
 jobs: 
   build-and-test:
-    # ubuntu 20 is built on debian 11 (bullseye), which is what Python provides us as a docker image 
-    # we'll use that here since it's the most similar environment provided by GitHub.  
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
       - name: Setup Python 3.9.x
@@ -26,7 +24,7 @@ jobs:
   # job to test against App Engine
   test-app-engine:
     needs: build-and-test
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps: 
       - name: Checkout
         uses: actions/checkout@v3
@@ -52,7 +50,7 @@ jobs:
 # job to test against Functions 
   test-functions:
     needs: build-and-test
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps: 
       - name: Checkout
         uses: actions/checkout@v3
@@ -80,7 +78,7 @@ jobs:
 # job to test against Cloud Run
   build-container: 
     needs: build-and-test
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -99,7 +97,7 @@ jobs:
           docker push europe-west3-docker.pkg.dev/cloud-variations-fs2023-test/hello-cloud/hello-cloud:latest
   test-run:
     needs: build-container
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps: 
       - name: Checkout
         uses: actions/checkout@v3
