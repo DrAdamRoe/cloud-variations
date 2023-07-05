@@ -3,7 +3,7 @@
 ## Dockerfile to build a basic flask app, based on 
 ## https://docs.docker.com/language/python/build-images/ 
 
-FROM python:3.10-slim-bullseye
+FROM python:3.11-slim-bullseye
 
 COPY . . 
 
