@@ -28,7 +28,7 @@ The goal of this section is to install and run our little web server locally on 
 Before you get started, you are expected to have some other software on your computer
 
 <!-- maybe: upgrade to 3.11.1 -->
-- Python 3.10 (tested with 3.10.6) 
+- Python 3.11 (tested with 3.11.4) 
 - git 
 - [Google Cloud SDK](https://cloud.google.com/sdk/docs/quickstart), (tested with version 437.0.1)
 - An integrated development environment, like VS Code. 
@@ -38,11 +38,11 @@ Before you get started, you are expected to have some other software on your com
 - mkdir WORKING_DIR && cd WORKING_DIR, with a directory name of your choice (e.g. cloud2023). 
 - git clone this repository locally
 
-- Install a local python virtual environment with python 3.10 to work with, 
+- Install a local python virtual environment with python 3.11 to work with, 
 
-    macOS/Linux: `python3.10 -m venv venv` 
+    macOS/Linux: `python3.11 -m venv venv` 
     
-    Windows: `c:\Python310\python -m venv c:\path\to\myenv`
+    Windows: `c:\Python311\python -m venv c:\path\to\myenv`
 
 - Activate your virtual environment for this project: 
    
@@ -132,9 +132,9 @@ Enable the cloud functions service on your project:
 
 And now we will deploy a single _function_ from our application, the function `index()` found in the file `api/hello_cloud.py`: 
 
-`gcloud functions deploy hello_cloud --runtime python310 --trigger-http --allow-unauthenticated --max-instances 2 --set-build-env-vars=GOOGLE_FUNCTION_SOURCE=api/hello_cloud.py --region=europe-west3`
+`gcloud functions deploy hello_cloud --runtime python311 --trigger-http --allow-unauthenticated --max-instances 2 --set-build-env-vars=GOOGLE_FUNCTION_SOURCE=api/hello_cloud.py --region=europe-west3`
 
-This reads as: "Hey Google, deploy a Cloud Function for me called hello_cloud, which is both the name of the function that I've defined as well as the name that you'll use to identify the function. That function in the file api/hello_cloud.py. It should use the Python 3.10 runtime, anyone can access it on the internet without authentication, but only allow 2 instance to not run up my bill. Run the function if there is an HTTP request to the URL". 
+This reads as: "Hey Google, deploy a Cloud Function for me called hello_cloud, which is both the name of the function that I've defined as well as the name that you'll use to identify the function. That function in the file api/hello_cloud.py. It should use the Python 3.11 runtime, anyone can access it on the internet without authentication, but only allow 2 instance to not run up my bill. Run the function if there is an HTTP request to the URL". 
 
 You should be able to now see your function running live on the internet now, at the url listed in the output of the command or in the console. It has a format like https://{Region}-{ProjectID}.cloudfunctions.net/{function-name}, in my case https://europe-west3-cloud-variations-fs2023-test.cloudfunctions.net/hello_cloud. 
 
@@ -170,7 +170,7 @@ Once this has been created, you should see an overview of your VM Instances (the
 
  ![VM Instances](./documentation/vm-instances.png) VM Instances.
 
-Now, we want to set this up to run our software. The next step is to SSH into your server. There are many ways to do this. Click on the "SSH" button to see options. "Open in Browser Window" will open a new browser window running a virtual terminal, giving you command-line access to your server. This is a fancy option which Google Cloud offers, and I would recommend trying it. You can also open this from your local command line (click on `view glcoud command` to see what you would type into your local terminal), or of course good old fashioned `ssh` from your local computer. Once in, poke around your computer a bit. The command `python3 --version` will show you that a version of Python is installed (I see 3.9.2), and `which git` will return empty, showing that git is not installed. Note that this is the wrong version of Python -- we are using 3.10 everywhere else -- but it seems to work. You can upgrade the Python version on your virtual machine yourself, as an exercise in system administration. 
+Now, we want to set this up to run our software. The next step is to SSH into your server. There are many ways to do this. Click on the "SSH" button to see options. "Open in Browser Window" will open a new browser window running a virtual terminal, giving you command-line access to your server. This is a fancy option which Google Cloud offers, and I would recommend trying it. You can also open this from your local command line (click on `view glcoud command` to see what you would type into your local terminal), or of course good old fashioned `ssh` from your local computer. Once in, poke around your computer a bit. The command `python3 --version` will show you that a version of Python is installed (I see 3.9.2), and `which git` will return empty, showing that git is not installed. Note that this is the wrong version of Python -- we are using 3.11 everywhere else -- but it seems to work. You can upgrade the Python version on your virtual machine yourself, as an exercise in system administration. 
 
 Let's start by installing git and well as venv: 
 
@@ -261,7 +261,7 @@ Now, we can deploy our app! The application configuration is entirely described 
 
 If you are asked for a location, choose `europe-west3` (Frankfurt), which is number 13. 
 
-And there we have it: your app is deployed! Look at that yaml file and see what we need to describe the infrastructure: a runtime (Python version), an instance class (the size of the VM we will us, in this case, [F1](https://cloud.google.com/appengine/docs/standard), with 256 MB of RAM), and some routing rules - similar to what we would need to define for a web server application like nginx, Caddy, or Apache. This tells app engine to respond to any request with the response of our application (as opposed to a redirect request, serving a static file, or an error, for instance. In this variation, we are able to specify resources (like the compute instance size), but still are not concerned with things like the underlying operating system. 
+And there we have it: your app is deployed! Look at that yaml file and see what we need to describe the infrastructure: a runtime (Python version), an instance class (the size of the VM we will us, in this case, [F1](https://cloud.google.com/appengine/docs/standard), with 384 MB of RAM), and some routing rules - similar to what we would need to define for a web server application like nginx, Caddy, or Apache. This tells app engine to respond to any request with the response of our application (as opposed to a redirect request, serving a static file, or an error, for instance. In this variation, we are able to specify resources (like the compute instance size), but still are not concerned with things like the underlying operating system. 
 
 ## Intermission: Containerize the Application
 
@@ -281,7 +281,7 @@ Note that if you are on a Mac with an ARM processor, such as an M1 or M2 MacBook
 
 At this point, you should be able to again make a request locally, via `curl localhost:5017` or by going to the browser. 
 
-At this stage it is worth it to have a look at our Dockerfile, even if you aren't very familiar with Docker. We first define which base image we are using - in this case, an imagine provided by the Python Organization built on top of Debian 11 (codename bullseye). This gives us an operating system and everything we need to run Python 3.10. Then, we copy files from our local development environment into Docker's working area, and after that, we do the same thing as we do locally without Docker: install packages, set an environment variable, and run the app. Just this time, it is running as a Docker container on our own computer. 
+At this stage it is worth it to have a look at our Dockerfile, even if you aren't very familiar with Docker. We first define which base image we are using - in this case, an imagine provided by the Python Organization built on top of Debian 11 (codename bullseye). This gives us an operating system and everything we need to run Python 3.11. Then, we copy files from our local development environment into Docker's working area, and after that, we do the same thing as we do locally without Docker: install packages, set an environment variable, and run the app. Just this time, it is running as a Docker container on our own computer. 
 
 ### Push the Image to Google Cloud 
 
