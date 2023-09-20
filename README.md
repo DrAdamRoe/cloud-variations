@@ -48,7 +48,7 @@ Before you get started, you are expected to have some other software on your com
    
     macOS/Linux: `source venv/bin/activate`
     
-    Windows: `venv\Scripts\activate.bat`
+    Windows: `venv\Scripts\activate`
 
 - Install packages: `pip install -r requirements.txt`
 
@@ -57,7 +57,7 @@ Before you get started, you are expected to have some other software on your com
 
     macOS/Linux:  `export FLASK_APP=main.py`
     
-    Windows: `set FLASK_APP=main.py`
+    Windows: `set FLASK_APP=main.py` or try `$env:FLASK_APP = "main.py`
 
 - run your flask application: 
 
