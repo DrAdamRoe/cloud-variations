@@ -1,9 +1,8 @@
 # syntax=docker/dockerfile:1
 
-## Dockerfile to build a basic flask app, based on 
-## https://docs.docker.com/language/python/build-images/ 
+## Dockerfile to build a basic flask app, based on https://docs.docker.com/language/python/
 
-FROM python:3.11-slim-bullseye
+FROM python:3.11.7-slim-bullseye
 
 COPY . . 
 

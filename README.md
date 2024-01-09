@@ -27,8 +27,8 @@ The goal of this section is to install and run our little web server locally on 
 ### Pre-Installed Requirements 
 Before you get started, you are expected to have some other software on your computer
 
-<!-- maybe: upgrade to 3.11.1 -->
-- Python 3.11 (tested with 3.11.4) 
+
+- Python 3.11 (tested with 3.11.7)
 - git 
 - [Google Cloud SDK](https://cloud.google.com/sdk/docs/quickstart), (tested with version 437.0.1)
 - An integrated development environment, like VS Code. 
@@ -444,4 +444,22 @@ Once you have followed the instructions there, the following build command shoul
 
 and then you can continue as above, with `docker run`, `docker tag`, `docker push`, and finally `gcloud run deploy`. Note that the local performance will be degraded with this setup, but that should be fine for this hello-world app. There are more sophisticated approaches for building for multiple architectures. 
 
+<!-- Maintenance Notes 
 
+# Before You Start 
+- Check for PRs from students 
+- Check for issues in repo 
+- Make sure everything still works in GitHub actions (request and link new billing account if necessary)
+
+
+# Upgrade Versions 
+- Choose latest-and-greatest stable python version; install via download page and update path if necessary.
+- Check if everything works locally (instructions above)
+- pip install --upgrade pip (as always)
+- pip list --outdated 
+- pip install Flask==2.2.3 // maybe 3.0 soon?
+
+- Upgrade Python version in README, workflow.yaml, Dockerfile
+- gcloud components update 
+
+-->
