@@ -5,7 +5,7 @@ This repository represents multiple ways to run a very simple server application
 
 ![Where should I run my stuff?](./documentation/where_should_you_run_your_workload_gcp.jpg)*Where Should I Run my stuff? Graphic from the [Google Cloud Developer Blog](https://cloud.google.com/blog/topics/developers-practitioners/where-should-i-run-my-stuff-choosing-google-cloud-compute-option)*. 
 
-The app itself is a hello world REST API with a JSON response, written in Python using Flask. The app itself is irrelevant, the ways of running it are the interested part. This repository accompanies a class at CODE University of Applied Sciences, last taught in Autumn 2023. 
+The app itself is a hello world REST API with a JSON response, written in Python using Flask. The app itself is irrelevant, the ways of running it are the interested part. This repository accompanies a class at CODE University of Applied Sciences.
 
 Pull Requests are highly welcome, for example for corrections, clarifications, or maintenance. 
 
@@ -247,13 +247,13 @@ In this variation, we will use Google's Platform-as-Service offering, Google App
 
 Create an instance of an App, either from the CLI or through the dashboard. Be sure to get the projectId from the previous step: 
 
-`gcloud app create --project=cloud-variations-fs2023-test --region=europe-west3`
+`gcloud app create --project=cloud-variations --region=europe-west3`
 
 again, you can check it's status at the CLI or the dashboard: 
 
-`gcloud app describe --project=cloud-variations-fs2023-test`
+`gcloud app describe --project=cloud-variations`
 
-Note that at this stage, you have created an "application", but there is nothing being served yet. You will automatically have a custom URL for this project, which has the format PROJECT_ID.appspot.com, in my case https://cloud-variations-fs2023-test.appspot.com. If you navigate to your own URL, you will get a 404: there is nothing being served there yet. 
+Note that at this stage, you have created an "application", but there is nothing being served yet. You will automatically have a custom URL for this project, which has the format PROJECT_ID.appspot.com, in my case https://cloud-variations.appspot.com. If you navigate to your own URL, you will get a 404: there is nothing being served there yet. 
 
 Now, we can deploy our app! The application configuration is entirely described in a single file, called `app-engine.yaml`. To deploy, we will tell app engine to use the configuration we have detailed in that file: 
 
@@ -301,13 +301,13 @@ Next, create a repository in the Artifact Registry for you to store your image i
 
 Note that the format "Docker" specifies that what type of artifact the repository should expect, a Docker Image. 
 
-Now you can tag your local image to push to a specific location, telling Docker where you will push it: to the repository you just created. You should replace `cloud-variations-fs2023-test` with your project name: 
+Now you can tag your local image to push to a specific location, telling Docker where you will push it: to the repository you just created. You should replace `cloud-variations` with your project name: 
 
-`docker tag hello-cloud:latest europe-west3-docker.pkg.dev/cloud-variations-fs2023-test/hello-cloud/hello-cloud:latest`
+`docker tag hello-cloud:latest europe-west3-docker.pkg.dev/cloud-variations/hello-cloud/hello-cloud:latest`
 
 And finally, push it to Google's Artifact Repository: 
 
-`docker push europe-west3-docker.pkg.dev/cloud-variations-fs2023-test/hello-cloud/hello-cloud:latest`
+`docker push europe-west3-docker.pkg.dev/cloud-variations/hello-cloud/hello-cloud:latest`
 
 Phew. We've built a Docker image locally and pushed it to Google Cloud. You can see the fruits of your labors (and browse the directory structure) over on the dashboard at https://console.cloud.google.com/gcr/images/{your-project-name}. 
 
@@ -321,7 +321,7 @@ First, enable the Google Cloud Run API:
 
 Then, we will create and deploy our new _service_, which will tell Cloud Run to run between 2 and 5 instances of our container based on the image we have built and pushed already. 
 
-`gcloud run deploy hello-cloud-run --image=europe-west3-docker.pkg.dev/cloud-variations-fs2023-test/hello-cloud/hello-cloud:latest --port=5022 --region=europe-west3 --allow-unauthenticated --min-instances=2 --max-instances=5`
+`gcloud run deploy hello-cloud-run --image=europe-west3-docker.pkg.dev/cloud-variations/hello-cloud/hello-cloud:latest --port=5022 --region=europe-west3 --allow-unauthenticated --min-instances=2 --max-instances=5`
 
 This command should feel a bit like the one we used for the FaaS offering at the start, but with a bit more control. If your container runs locally but not on google cloud, you may need to change the build architecture. Have a look at the troubleshooting section below. 
 
@@ -370,7 +370,7 @@ Now, try to find out a bit about your cluster using `kubectl describe`, for exam
 
 Create a _deployment_ based on our Docker image, effectively declaring that we want our Docker image to run in Kubernetes:
 
-`kubectl create deployment hello-cloud-server --image=europe-west3-docker.pkg.dev/cloud-variations-fs2023-test/hello-cloud/hello-cloud:latest`
+`kubectl create deployment hello-cloud-server --image=europe-west3-docker.pkg.dev/cloud-variations/hello-cloud/hello-cloud:latest`
 
 Once you have run this, it is running already, but we have to expose it on the network to see it, mapping our local port 5022 to the public port 80 for HTTP: 
 
