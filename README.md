@@ -33,6 +33,7 @@ Before you get started, you are expected to have some other software on your com
 - [Google Cloud SDK](https://cloud.google.com/sdk/docs/quickstart), (tested with version 459.0.0)
 - An integrated development environment, like VS Code. 
 - [Docker](https://www.docker.com/products/docker-desktop) for building and running docker images locally
+- [Kubectl](https://kubernetes.io/docs/tasks/tools/), giving you a CLI for Kubernetes (this is optional)
 
 ### Install Locally   
 - mkdir WORKING_DIR && cd WORKING_DIR, with a directory name of your choice (e.g. cloud-variations). 
@@ -128,11 +129,15 @@ Enable the cloud functions service on your project:
 
 `gcloud services enable cloudfunctions.googleapis.com`
 
+Enable Google Artifact Registry, a dedicated type of storage which we will configure to store Docker images (similar to Docker Hub, if you are familiar with it). This is used behind the scenes by cloud functions, and we will use it explicitly when we build our own images later:
+
+`gcloud services enable artifactregistry.googleapis.com`
+
 And now we will deploy a single _function_ from our application, the function `index()` found in the file `api/hello_cloud.py`: 
 
-`gcloud functions deploy hello_cloud --runtime python311 --trigger-http --allow-unauthenticated --max-instances 2 --set-build-env-vars=GOOGLE_FUNCTION_SOURCE=api/hello_cloud.py --region=europe-west3`
+`gcloud functions deploy hello_cloud --runtime python311 --trigger-http --allow-unauthenticated --max-instances 2 --set-build-env-vars=GOOGLE_FUNCTION_SOURCE=api/hello_cloud.py --region=europe-west3 --docker-registry=artifact-registry`
 
-This reads as: "Hey Google, deploy a Cloud Function for me called hello_cloud, which is both the name of the function that I've defined as well as the name that you'll use to identify the function. That function in the file api/hello_cloud.py. It should use the Python 3.11 runtime, anyone can access it on the internet without authentication, but only allow 2 instance to not run up my bill. Run the function if there is an HTTP request to the URL". 
+This reads as: "Hey Google, deploy a Cloud Function for me called hello_cloud, which is both the name of the function that I've defined as well as the name that you'll use to identify the function. That function is in the file api/hello_cloud.py, which you can build into some executable stored in the artifact registry. It should use the Python 3.11 runtime, anyone can access it on the internet without authentication, but only allow 2 instance to not run up my bill. Run the function if there is an HTTP request to the URL. ". 
 
 You should be able to now see your function running live on the internet now, at the url listed in the output of the command or in the console. It has a format like https://{Region}-{ProjectID}.cloudfunctions.net/{function-name}, in my case https://europe-west3-cloud-variations.cloudfunctions.net/hello_cloud. 
 
@@ -168,7 +173,7 @@ Once this has been created, you should see an overview of your VM Instances (the
 
  ![VM Instances](./documentation/vm-instances.png) VM Instances.
 
-Now, we want to set this up to run our software. The next step is to SSH into your server. There are many ways to do this. Click on the "SSH" button to see options. "Open in Browser Window" will open a new browser window running a virtual terminal, giving you command-line access to your server. This is a fancy option which Google Cloud offers, and I would recommend trying it. You can also open this from your local command line (click on `view glcoud command` to see what you would type into your local terminal), or of course good old fashioned `ssh` from your local computer. Once in, poke around your computer a bit. The command `python3 --version` will show you that a version of Python is installed (I see 3.9.2), and `which git` will return empty, showing that git is not installed. Note that this is the wrong version of Python -- we are using 3.11 everywhere else -- but it seems to work. You can upgrade the Python version on your virtual machine yourself, as an exercise in system administration. 
+Now, we want to set this up to run our software. The next step is to SSH into your server. There are many ways to do this. Click on the "SSH" button to see options. "Open in Browser Window" will open a new browser window running a virtual terminal, giving you command-line access to your server. This is a fancy option which Google Cloud offers, and I would recommend trying it. You can also open this from your local command line (click on `view gcloud command` to see what you would type into your local terminal), or of course good old fashioned `ssh` from your local computer. Once in, poke around your computer a bit. The command `python3 --version` will show you that a version of Python is installed (I see 3.9.2), and `which git` will return empty, showing that git is not installed. Note that this is the wrong version of Python -- we are using 3.11 everywhere else -- but it seems to work. You can upgrade the Python version on your virtual machine yourself, as an exercise in system administration. 
 
 Let's start by installing git and well as venv: 
 
@@ -257,9 +262,7 @@ Now, we can deploy our app! The application configuration is entirely described 
 
 `gcloud app deploy app-engine.yaml`
 
-If you are asked for a location, choose `europe-west3` (Frankfurt), which is number 13. 
-
-And there we have it: your app is deployed! Look at that yaml file and see what we need to describe the infrastructure: a runtime (Python version), an instance class (the size of the VM we will us, in this case, [F1](https://cloud.google.com/appengine/docs/standard), with 384 MB of RAM), and some routing rules - similar to what we would need to define for a web server application like nginx, Caddy, or Apache. This tells app engine to respond to any request with the response of our application (as opposed to a redirect request, serving a static file, or an error, for instance. In this variation, we are able to specify resources (like the compute instance size), but still are not concerned with things like the underlying operating system. 
+And there we have it: your app is deployed! Look at that yaml file and see what we need to describe the infrastructure: a runtime (Python version), an instance class (the amount of resources allocated, in this case, [F1](https://cloud.google.com/appengine/docs/standard), with 384 MB of RAM, 600 MHz of processing and a limit of 2 workers), and some routing rules - similar to what we would need to define for a web server application like nginx, Caddy, or Apache. This tells app engine to respond to any request with the response of our application (as opposed to a redirect request, serving a static file, or an error, for instance). In this variation, we are able to specify resources (like the compute instance size), but still are not concerned with things like the underlying operating system. 
 
 ## Intermission: Containerize the Application
 
@@ -275,21 +278,15 @@ and run it locally:
 
 `docker run --publish 5017:5022 hello-cloud`
 
-Note that if you are on a Mac with an ARM processor, such as an M1 or M2 MacBook Pro, the container you build with the above command will not run on more standard x86 Intel processors, which are found, for example, on the cloud. So much for Docker's old sloagn "Build Once, Run Anywhere". To resolve this, build your docker container with the additional flag `--platform linux/amd64` if you are on an ARM Mac. You'll get a warning when running that image locally, but the same container will then work both locally and on the cloud (it will not be very efficient locally, but that is fine for this tutorial).
+Note that if you are on a Mac with an ARM processor, such as an M1 or M2 MacBook Pro, the container you build with the above command will not run on more standard x86 Intel processors, which are found, for example, on the cloud. So much for Docker's old slogan "Build Once, Run Anywhere". To resolve this, build your docker container with the additional flag `--platform linux/amd64` if you are on an ARM Mac. You'll get a warning when running that image locally, but the same container will then work both locally and on the cloud (it will not be very efficient locally, but that is fine for this tutorial).
 
 At this point, you should be able to again make a request locally, via `curl localhost:5017` or by going to the browser. 
 
-At this stage it is worth it to have a look at our Dockerfile, even if you aren't very familiar with Docker. We first define which base image we are using - in this case, an imagine provided by the Python Organization built on top of Debian 11 (codename bullseye). This gives us an operating system and everything we need to run Python 3.11. Then, we copy files from our local development environment into Docker's working area, and after that, we do the same thing as we do locally without Docker: install packages, set an environment variable, and run the app. Just this time, it is running as a Docker container on our own computer. 
+At this stage it is worth it to have a look at our Dockerfile, even if you aren't very familiar with Docker. We first define which base image we are using - in this case, an imagine provided by the Python Organization built on top of Debian 11 (codename bullseye). This gives us an operating system and everything we need to run Python 3.11. Then, we copy files from our local development environment into Docker's working area, and after that, we do the same thing as we do locally without Docker: install packages, set an environment variable, and run the app. Just this time, it is running as a Docker container on our own computer. The Docker Desktop app is a good way to explore Docker's options too. 
 
 ### Push the Image to Google Cloud 
 
-In this step, we will push our image to Google Artifact Registry -- a dedicated type of storage which we will configure to store Docker images (similar to Docker Hub, if you are familiar with it). 
-
-Start by Enabling the Artifact Registry:
-
-`gcloud services enable artifactregistry.googleapis.com`
-
-Now, we'll push your Docker Image to Google's Artifact Repository. To do this, we will use the tool provided by gCloud to authorize yourself on Docker on your machine giving you permissions to push to your Google Cloud Artifact Registry: 
+Now that we've built an image locally, we'll push that Docker Image to Google's Artifact Repository. To do this, we will use the tool provided by gCloud to authorize yourself on Docker on your machine giving you permissions to push to your Google Cloud Artifact Registry: 
 
 `gcloud auth configure-docker europe-west3-docker.pkg.dev`
 
@@ -307,7 +304,9 @@ And finally, push it to Google's Artifact Repository:
 
 `docker push europe-west3-docker.pkg.dev/cloud-variations/hello-cloud/hello-cloud:latest`
 
-Phew. We've built a Docker image locally and pushed it to Google Cloud. You can see the fruits of your labors (and browse the directory structure) over on the dashboard at https://console.cloud.google.com/gcr/images/{your-project-name}. 
+Phew. We've built a Docker image locally and pushed it to Google Cloud. You can see the fruits of your labors (and browse the directory structure) over on the dashboard at https://console.cloud.google.com/artifacts. You should be able to see a container called hello-cloud (that you just made), as well as something called "gcf-artifacts" which was created when we used Google Cloud Functions earlier. 
+
+Next, we can choose from a myriad of ways to run the image we have just made ourselves. 
 
 ## Variation: Serverless Container Management 
 
@@ -334,12 +333,7 @@ Once you are done, remember to cleanup by deleting the service -- otherwise it c
 
 We've already run some high-level managed versions of our API, and now we are going to take things a bit more into our own hands, running our service in Kubernetes. We will use Google Kubernetes Engine, Google's managed Kubernetes cluster, so we only have to _use_ Kubernetes, not host it ourselves. 
 
-! Note that this may get a little bit tricky on your local machine. If you have trouble with further installation and configuration, you access the [gCloud Shell](https://cloud.google.com/shell) through your browser, giving you a command line interface allowing you to interact with your project. 
-
-### Additional Software 
-
-- [Install kubectl](https://kubernetes.io/docs/tasks/tools/), the command line interface for interacting with Kubernetes itself. 
-
+Note that this may get a little bit tricky on your local machine. If you have trouble with further installation and configuration, you access the [gCloud Shell](https://cloud.google.com/shell) through your browser, giving you a command line interface allowing you to interact with your project. 
 
 ### Run our container using Kubernetes
 Now it's time to run our Docker container on our own Kubernetes Cluster. 
@@ -360,7 +354,7 @@ You may crash out with an error that says _Please specify location_. Let's set i
 
 `gcloud config set compute/zone europe-west3-b`
 
-and try again to create the cluster with the above command. Now you should get a few yellow warnings, but no red errors. 
+and try again to create the cluster with the above command. Now you might get a few yellow warnings, but no red errors. 
 
 And now we are ready to interact with our Kubernetes cluster!
 
@@ -388,6 +382,7 @@ Before you leave: shut off your Kube cluster, otherwise you'll run out of money,
 
 `gcloud container clusters delete hello-cloud-cluster`
 
+If you would like to dig deeper into Kubernetes, I recommend setting up [minikube](https://minikube.sigs.k8s.io/docs/start/) on your laptop to have a playground without running up big cloud bills. 
 
 ## Cleanup! 
 
@@ -457,7 +452,14 @@ and then you can continue as above, with `docker run`, `docker tag`, `docker pus
 - pip list --outdated 
 - pip install Flask==2.2.3 // maybe 3.0 soon?
 
-- Upgrade Python version in README, workflow.yaml, Dockerfile
+- Upgrade Python version in README, workflow.yaml, Dockerfile, app-engine.yaml
+
 - gcloud components update 
+- update Kubectl version
+- run through instructions manually locally
+
+# When you think you're done...
+- Push, check that it runs, and then check the workflow file and make sure that's up to date, too 
+- OS Versions, Action versions, Google ENV variables... 
 
 -->
