@@ -83,7 +83,7 @@ Now that you have a local version of our highly sophisticated API running, the g
 - If you have trouble with the local setup of the gCloud SDK, it is worth it to note that everything done here can be done in the browser, as well. You can still participate in the class and learn a lot, but the steps are not documented here -- you'll have to find that in the documentation online. 
 
 ### Prepare your Google Cloud Account
-In GCP, a Project is the top-level organizational element. You can learn more about it [here](https://cloud.google.com/storage/docs/projects) or elsewhere. We will use one project for the following examples, but feel free to create more, for instance, one project per variation, if you would like. The names are entirely up to you; you are encouraged to customize them to your liking. 
+In GCP, a Project is the top-level organizational element. You can learn more about it [here](https://cloud.google.com/storage/docs/projects) or elsewhere. We will use one project for the following examples, but feel free to create more, for instance, one project per variation, if you would like. The names are entirely up to you; you are encouraged to customize them to your liking. You may also need to authenticate early on in this process or be asked other questions by the CLI. 
 
 
 Create a project on Google Cloud Platform: 
@@ -110,11 +110,9 @@ Note that this step is a little bit finnicky. If you have errors here, there is 
 
 ![gcloud billing account for project not found](./documentation/glcoud-projects-enable-cloudbuild.png) 
 
-The goal is to associate the Education Credits you have received with this project. The easiest way to do this is [on the dashboard in the browser](https://cloud.google.com/billing/docs/how-to/modify-project#to_change_the_projects_account_do_the_following), but it can be done via the CLI as well. 
+The goal is to associate the Education Credits you have received with this project. You can do this either [on the dashboard in the browser](https://cloud.google.com/billing/docs/how-to/modify-project#to_change_the_projects_account_do_the_following) or via the [CLI](https://cloud.google.com/sdk/gcloud/reference/billing) which allow you to do this from the command line. First, use `gcloud billing accounts list` to get the ACCOUNT_ID of the account you want to use; if you are new to gCloud it should be the only account listed. The ID has a format like 0X0X0X-0X0X0X-0X0X0X. Then, link that billing account to your project, e.g. 
 
-As of writing, there are [commands in the beta version of the gcloud SDK API](https://cloud.google.com/sdk/gcloud/reference/billing) which allow you to do this from the command line. First, use `gcloud beta billing accounts list` to get the ACCOUNT_ID of the account you want to use; if you are new to gCloud it should be the only account listed. The ID has a format like 0X0X0X-0X0X0X-0X0X0X. Then, link that billing account to your project, e.g. 
-
-`gcloud beta billing projects link cloud-variations --billing-account 0X0X0X-0X0X0X-0X0X0X`
+`gcloud billing projects link cloud-variations --billing-account 0X0X0X-0X0X0X-0X0X0X`
 
 Now you should be able to enable the cloud build API without running into errors: 
 
