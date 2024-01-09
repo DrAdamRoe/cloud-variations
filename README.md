@@ -30,12 +30,12 @@ Before you get started, you are expected to have some other software on your com
 
 - Python 3.11 (tested with 3.11.7)
 - git 
-- [Google Cloud SDK](https://cloud.google.com/sdk/docs/quickstart), (tested with version 437.0.1)
+- [Google Cloud SDK](https://cloud.google.com/sdk/docs/quickstart), (tested with version 459.0.0)
 - An integrated development environment, like VS Code. 
 - [Docker](https://www.docker.com/products/docker-desktop) for building and running docker images locally
 
 ### Install Locally   
-- mkdir WORKING_DIR && cd WORKING_DIR, with a directory name of your choice (e.g. cloud2023). 
+- mkdir WORKING_DIR && cd WORKING_DIR, with a directory name of your choice (e.g. cloud-variations). 
 - git clone this repository locally
 
 - Install a local python virtual environment with python 3.11 to work with, 
@@ -88,17 +88,17 @@ In GCP, a Project is the top-level organizational element. You can learn more ab
 
 Create a project on Google Cloud Platform: 
 
- `gcloud projects create cloud-variations-fs2023-test --name="Cloud Variations"`
+ `gcloud projects create cloud-variations --name="Cloud Variations"`
 
 You should be able to see this in your dashboard on Google Cloud after a few seconds. Now, we're ready for our first deployment! You can also get information from the CLI using `describe`, e.g. 
 
-`gcloud projects describe cloud-variations-fs2023-test`
+`gcloud projects describe cloud-variations`
 
 which will show information including status, name, and the projectId, which we will need in the next step. 
 
 Once creating this project, set your local environment to default to using that new project: 
 
-`gcloud config set project cloud-variations-fs2023-test`
+`gcloud config set project cloud-variations`
 
 This ensures that it will not conflict with any other projects you may have on GCP.
 
@@ -114,7 +114,7 @@ The goal is to associate the Education Credits you have received with this proje
 
 As of writing, there are [commands in the beta version of the gcloud SDK API](https://cloud.google.com/sdk/gcloud/reference/billing) which allow you to do this from the command line. First, use `gcloud beta billing accounts list` to get the ACCOUNT_ID of the account you want to use; if you are new to gCloud it should be the only account listed. The ID has a format like 0X0X0X-0X0X0X-0X0X0X. Then, link that billing account to your project, e.g. 
 
-`gcloud beta billing projects link cloud-variations-fs2023-test --billing-account 0X0X0X-0X0X0X-0X0X0X`
+`gcloud beta billing projects link cloud-variations --billing-account 0X0X0X-0X0X0X-0X0X0X`
 
 Now you should be able to enable the cloud build API without running into errors: 
 
@@ -136,7 +136,7 @@ And now we will deploy a single _function_ from our application, the function `i
 
 This reads as: "Hey Google, deploy a Cloud Function for me called hello_cloud, which is both the name of the function that I've defined as well as the name that you'll use to identify the function. That function in the file api/hello_cloud.py. It should use the Python 3.11 runtime, anyone can access it on the internet without authentication, but only allow 2 instance to not run up my bill. Run the function if there is an HTTP request to the URL". 
 
-You should be able to now see your function running live on the internet now, at the url listed in the output of the command or in the console. It has a format like https://{Region}-{ProjectID}.cloudfunctions.net/{function-name}, in my case https://europe-west3-cloud-variations-fs2023-test.cloudfunctions.net/hello_cloud. 
+You should be able to now see your function running live on the internet now, at the url listed in the output of the command or in the console. It has a format like https://{Region}-{ProjectID}.cloudfunctions.net/{function-name}, in my case https://europe-west3-cloud-variations.cloudfunctions.net/hello_cloud. 
 
 And there we have it: you can run a function on Google's Cloud without any concern for how to manage the server, just setting a few basic parameters.  
 
