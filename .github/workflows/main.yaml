@@ -31,7 +31,7 @@ jobs:
       - name: Authorize GCP
         uses: 'google-github-actions/auth@v1'
         with: 
-            credentials_json: ${{ secrets.JSON_CREDENTIALS_fs2023_test }}  
+            credentials_json: ${{ secrets.JSON_CREDENTIALS_spring2024 }}  
       - name: Deploy to Google App Engine
         id: deploy-gae
         uses: google-github-actions/deploy-appengine@v1
@@ -57,7 +57,7 @@ jobs:
       - name: Authorize GCP
         uses: 'google-github-actions/auth@v1'
         with: 
-          credentials_json: ${{ secrets.JSON_CREDENTIALS_fs2023_test }}  
+          credentials_json: ${{ secrets.JSON_CREDENTIALS_spring2024 }}  
       - name: Deploy to Google Cloud Functions
         id: deploy-functions
         uses: google-github-actions/deploy-cloud-functions@v1
@@ -85,7 +85,7 @@ jobs:
       - name: Authorize GCP
         uses: 'google-github-actions/auth@v1'
         with: 
-          credentials_json: ${{ secrets.JSON_CREDENTIALS_fs2023_test }}  
+          credentials_json: ${{ secrets.JSON_CREDENTIALS_spring2024 }}  
       - name: Setup Cloud SDK
         uses: google-github-actions/setup-gcloud@v1
       - name: Authorize Docker push
@@ -104,7 +104,7 @@ jobs:
       - name: Authorize GCP
         uses: 'google-github-actions/auth@v1'
         with: 
-          credentials_json: ${{ secrets.JSON_CREDENTIALS_fs2023_test }}        
+          credentials_json: ${{ secrets.JSON_CREDENTIALS_spring2024 }}        
       - name: Deploy to Google Cloud Run
         id: deploy-run
         uses: google-github-actions/deploy-cloudrun@v1

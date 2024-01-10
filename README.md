@@ -443,7 +443,7 @@ and then you can continue as above, with `docker run`, `docker tag`, `docker pus
 - Check for PRs from students 
 - Check for issues in repo 
 - Make sure everything still works in GitHub actions (request and link new billing account if necessary)
-
+- clean project needs new key: https://cloud.google.com/iam/docs/keys-create-delete 
 
 # Upgrade Versions 
 - Choose latest-and-greatest stable python version; install via download page and update path if necessary.
@@ -461,5 +461,8 @@ and then you can continue as above, with `docker run`, `docker tag`, `docker pus
 # When you think you're done...
 - Push, check that it runs, and then check the workflow file and make sure that's up to date, too 
 - OS Versions, Action versions, Google ENV variables... 
+- Create service account for GitHub followed old permissions & create key, upload to GitHub
+- https://cloud.google.com/iam/docs/keys-create-delete
 
+--> 
 -->
