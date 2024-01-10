@@ -110,7 +110,7 @@ jobs:
         uses: google-github-actions/deploy-cloudrun@v1
         with:
           service: hello-cloud-run
-          image: europe-west3-docker.pkg.dev/cloud-variations-spring24-test/hello-cloud/hello-cloud:latest
+          image: europe-west3-docker.pkg.dev/cloud-variations-spring24test/hello-cloud/hello-cloud:latest
           region: europe-west3
           flags: --port=5022 --allow-unauthenticated
       - name: Get response from Google Cloud Run deployment 
