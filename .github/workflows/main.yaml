@@ -93,8 +93,8 @@ jobs:
 
       - name: Build and Push Container
         run: |
-          docker build --tag europe-west3-docker.pkg.dev/cloud-variations-fs2023-test/hello-cloud/hello-cloud:latest .
-          docker push europe-west3-docker.pkg.dev/cloud-variations-fs2023-test/hello-cloud/hello-cloud:latest
+          docker build --tag europe-west3-docker.pkg.dev/cloud-variations-spring2024-test/hello-cloud/hello-cloud:latest .
+          docker push europe-west3-docker.pkg.dev/cloud-variations-spring2024-test/hello-cloud/hello-cloud:latest
   test-run:
     needs: build-container
     runs-on: ubuntu-22.04
@@ -110,7 +110,7 @@ jobs:
         uses: google-github-actions/deploy-cloudrun@v1
         with:
           service: hello-cloud-run
-          image: europe-west3-docker.pkg.dev/cloud-variations-fs2023-test/hello-cloud/hello-cloud:latest
+          image: europe-west3-docker.pkg.dev/cloud-variations-spring2024-test/hello-cloud/hello-cloud:latest
           region: europe-west3
           flags: --port=5022 --allow-unauthenticated
       - name: Get response from Google Cloud Run deployment 
@@ -122,10 +122,3 @@ jobs:
         if: ${{ !contains(env.GCR_CURL_RESPONSE, 'Hello, Cloud') }}
         run: exit 1
 
-#### to start a new project/semester: 
-# - update project names in this file 
-# - download JSON credentials for default app engine service account, upload to GitHub
-# - enable app engine admin and cloud run admin apis: 
-#     gcloud services enable appengine.googleapis.com cloudbuild.googleapis.com
-# - add run admin role to project: 
-#     gcloud projects add-iam-policy-binding cloud-variations-fs2023-test --member=serviceAccount:cloud-variations-fs2023-test@appspot.gserviceaccount.com --role=roles/run.admin

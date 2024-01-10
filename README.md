@@ -461,8 +461,17 @@ and then you can continue as above, with `docker run`, `docker tag`, `docker pus
 # When you think you're done...
 - Push, check that it runs, and then check the workflow file and make sure that's up to date, too 
 - OS Versions, Action versions, Google ENV variables... 
+- https://console.cloud.google.com/apis/library/appengine.googleapis.com (for github actions)
 - Create service account for GitHub followed old permissions & create key, upload to GitHub
 - https://cloud.google.com/iam/docs/keys-create-delete
 
+
+#### to start a new project/semester: 
+# - update project names in this file 
+# - download JSON credentials for default app engine service account, upload to GitHub
+# - enable app engine admin and cloud run admin apis: 
+#     gcloud services enable appengine.googleapis.com cloudbuild.googleapis.com
+# - add run admin role to project: 
+#     gcloud projects add-iam-policy-binding cloud-variations-fs2023-test --member=serviceAccount:cloud-variations-fs2023-test@appspot.gserviceaccount.com --role=roles/run.admin
+
 --> 
--->
