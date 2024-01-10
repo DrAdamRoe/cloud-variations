@@ -93,8 +93,8 @@ jobs:
 
       - name: Build and Push Container
         run: |
-          docker build --tag europe-west3-docker.pkg.dev/cloud-variations-spring2024-test/hello-cloud/hello-cloud:latest .
-          docker push europe-west3-docker.pkg.dev/cloud-variations-spring2024-test/hello-cloud/hello-cloud:latest
+          docker build --tag europe-west3-docker.pkg.dev/cloud-variations-spring2024test/hello-cloud/hello-cloud:latest .
+          docker push europe-west3-docker.pkg.dev/cloud-variations-spring2024test/hello-cloud/hello-cloud:latest
   test-run:
     needs: build-container
     runs-on: ubuntu-22.04
