@@ -28,7 +28,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Authorize GCP
-        uses: 'google-github-actions/auth@v1'
+        uses: 'google-github-actions/auth@v2'
         with: 
             credentials_json: ${{ secrets.JSON_CREDENTIALS_spring2024 }}  
       - name: Deploy to Google App Engine
@@ -54,7 +54,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Authorize GCP
-        uses: 'google-github-actions/auth@v1'
+        uses: 'google-github-actions/auth@v2'
         with: 
           credentials_json: ${{ secrets.JSON_CREDENTIALS_spring2024 }}  
       - name: Deploy to Google Cloud Functions
@@ -82,7 +82,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Authorize GCP
-        uses: 'google-github-actions/auth@v1'
+        uses: 'google-github-actions/auth@v2'
         with: 
           credentials_json: ${{ secrets.JSON_CREDENTIALS_spring2024 }}  
       - name: Setup Cloud SDK
@@ -101,7 +101,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Authorize GCP
-        uses: 'google-github-actions/auth@v1'
+        uses: 'google-github-actions/auth@v2'
         with: 
           credentials_json: ${{ secrets.JSON_CREDENTIALS_spring2024 }}        
       - name: Deploy to Google Cloud Run

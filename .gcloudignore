@@ -23,3 +23,4 @@ __pycache__/
 
 # Ignore our local python files
 venv/
+gha-creds-*.json
