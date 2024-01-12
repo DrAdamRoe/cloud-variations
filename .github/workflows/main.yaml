@@ -59,11 +59,11 @@ jobs:
           credentials_json: ${{ secrets.JSON_CREDENTIALS_spring2024 }}  
       - name: Deploy to Google Cloud Functions
         id: deploy-functions
-        uses: google-github-actions/deploy-cloud-functions@v1
+        uses: google-github-actions/deploy-cloud-functions@v2
         with:
           name: hello_cloud
           build_environment_variables: GOOGLE_FUNCTION_SOURCE=api/hello_cloud.py
-          runtime: python39
+          runtime: python311
           region: europe-west3
       - name: Get response from Google Cloud Functions deployment 
         run: |
