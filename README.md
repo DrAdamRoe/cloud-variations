@@ -477,4 +477,8 @@ and then you can continue as above, with `docker run`, `docker tag`, `docker pus
 #     gcloud iam workload-identity-pools describe "github" --project="cloud-variations-spring24test" --location="global" --format="value(name)"
 #     gcloud iam workload-identity-pools providers create-oidc "my-repo"   --project="cloud-variations-spring24test"   --location="global"   --workload-identity-pool="github"   --display-name="My GitHub repo Provider"   --attribute-mapping="google.subject=assertion.sub,attribute.actor=assertion.actor,attribute.repository=assertion.repository"   --issuer-uri="https://token.actions.githubusercontent.com"
 #    gcloud iam workload-identity-pools providers describe "my-repo"   --project="cloud-variations-spring24test"   --location="global"   --workload-identity-pool="github"   --format="value(name)"
+
+Enable APIs for WIF: 
+# https://cloud.google.com/iam/docs/workload-identity-federation-with-deployment-pipelines 
+
 --> 
