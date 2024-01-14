@@ -107,7 +107,7 @@ Before we start deploying, we have to enable the Cloud Build API, which several 
 
 `gcloud services enable cloudbuild.googleapis.com`
 
-Note that this step is a little bit finnicky. If you have errors here, there is likely a problem with the credits or billing. You may have to go into the console and associate the credits you have received with this new project. 
+Note that this step is a little bit finicky. If you have errors here, there is likely a problem with the credits or billing. You may have to go into the console and associate the credits you have received with this new project. 
 
 ![gcloud billing account for project not found](./documentation/glcoud-projects-enable-cloudbuild.png) 
 
@@ -161,7 +161,7 @@ Once there, click on "Create Instance". This will walk you through the process o
 In particular: 
  
  * Set the Region to `europe-west10` (Berlin)
- * Set the Machine Type to `e2-micro` (2 CPUs, 1GB RAM
+ * Set the Machine Type to `e2-micro` (2 CPUs, 1GB RAM)
  * VM Provisioning Model should be "Standard" 
  * Make sure the Boot Disk is set to `Debian 11` (Bullseye)
  * Set the Firewall to "Allow HTTP Traffic" 
@@ -202,7 +202,7 @@ Now, you should be able to run the following command, using a production-ready s
 
 > uwsgi --socket 127.0.0.1:5017 --wsgi-file main.py --callable app
 
-The output to terminal looks different, but you should now be running your Flask app on your server on port 5017, once again. Go to your virtual machine's public internet address in the browser, visible on the VM Instances overview page on the Google Cloud Console. Mine is http://34.159.224.162/. You won't see your API, unfortunately, but you will see an error of some kind. Since HTTP uses port 80 as a standard, both our browser and Google's network settings expect us to be requesting from and listening on port 80, not 5017. To remedy this, we'll use a webserver called nginx. Kill the process in your terminal again (ctrl+c). We're almost there. 
+The output to terminal looks different, but you should now be running your Flask app on your server on port 5017, once again. Go to your virtual machine's public internet address in the browser, visible on the VM Instances overview page on the Google Cloud Console. Mine is http://34.159.224.162/. You won't see your API, unfortunately, but you will see an error of some kind. Since HTTP uses port 80 as a standard, both our browser and Google's network settings expect us to be requesting from and listening on port 80, not 5017. To remedy this, we'll use a web server called nginx. Kill the process in your terminal again (ctrl+c). We're almost there. 
 
 Install nginx: 
 > sudo apt-get install nginx 
@@ -242,7 +242,7 @@ As a final step, we have to start our Flask application again, using the same co
 
 Reload the browser and you should see your favorite API response. 
 
-There you have it: you have rented a virtual machine from Google Cloud and set up your Flask server by hand. You have enormous control using this method, but that was a few more steps than the previous approach. For this service to be usable in production, you would need to do two additional steps (at a minimum). While the webserver nginx is now set up to always be running, the Flask application is running via the terminal right now. If your connection closes, if you shut off your home computer, the process will stop on the rented server. You would need to make this run automatically. Additionally, you would need to encrypt the connection, using HTTPS instead of HTTP. There are excellent instructions for how to do this [here](https://www.digitalocean.com/community/tutorials/how-to-serve-flask-applications-with-uwsgi-and-nginx-on-ubuntu-20-04), using a slightly different set up - but it should be close enough for you to make that work, if you would like to. 
+There you have it: you have rented a virtual machine from Google Cloud and set up your Flask server by hand. You have enormous control using this method, but that was a few more steps than the previous approach. For this service to be usable in production, you would need to do two additional steps (at a minimum). While the web server nginx is now set up to always be running, the Flask application is running via the terminal right now. If your connection closes, if you shut off your home computer, the process will stop on the rented server. You would need to make this run automatically. Additionally, you would need to encrypt the connection, using HTTPS instead of HTTP. There are excellent instructions for how to do this [here](https://www.digitalocean.com/community/tutorials/how-to-serve-flask-applications-with-uwsgi-and-nginx-on-ubuntu-20-04), using a slightly different set up - but it should be close enough for you to make that work, if you would like to. 
 
 
 ## Variation: Platform-as-a-Service
@@ -377,7 +377,7 @@ In my case, I see 34.107.66.217, which I can now access in the browser at http:/
 
 That's "it"! Your very own Docker container running on your very own Kubernetes Cluster. 
 
-Before you leave: shut off your Kube cluster, otherwise you'll run out of money, shutting off the load balancer and then your cluster: 
+Before you leave: shut off your Kubernetes cluster, otherwise you'll run out of money, shutting off the load balancer and then your cluster: 
 
 `kubectl delete service hello-cloud-server`
 
