@@ -160,8 +160,9 @@ Once there, click on "Create Instance". This will walk you through the process o
 
 In particular: 
  
- * Set the Region to `europe-west3` (Frankfurt)
+ * Set the Region to `europe-west10` (Berlin)
  * Set the Machine Type to `e2-micro` (2 CPUs, 1GB RAM
+ * VM Provisioning Model should be "Standard" 
  * Make sure the Boot Disk is set to `Debian 11` (Bullseye)
  * Set the Firewall to "Allow HTTP Traffic" 
  
@@ -191,19 +192,17 @@ Now, you should be able to run your app. Expose it on port 5017:
 
 Your flask app is now running on a computer in the cloud, but it is not accessible on the internet yet. The port we are running on, 5017, is not a standard port. Use ctrl+c to kill the process. 
 
-What we will do next is set up our environment to run a web server on the public internet. So far, we have a Debian Linux operating system running on Google Cloud's infrastructure, and we have our code on it, which we are able to run. A combination of steps is necessary to run our server. You may have noticed the big red warning saying "do not do this in production, use WSGI instead.". That is what we'll do. To do this, we have to install a few more things:
+What we will do next is set up our environment to run a web server on the public internet. So far, we have a Debian Linux operating system running on Google Cloud's infrastructure, and we have our code on it, which we are able to run. A combination of steps is necessary to run our server. You may have noticed the big red warning saying "do not do this in production, use WSGI instead.". That is what we'll do. We can install a production-ready Python server, uWSGI. This is a best-practice, and it is enforced by the security practices on the infrastructure we have rented and set up so far. 
 
-First, we need some system-wide build tools: 
-> sudo apt-get install build-essential python3-dev 
+Install the package: 
 
-Then, we can install a production-ready Python server, uWSGI. This is a best-practice, and it is enforced by the security practices on the infrastructure we have rented and set up so far. 
+> pip install pyuwsgi 
 
-> pip install --version uWSGI==2.0.21
+Now, you should be able to run the following command, using a production-ready server in place of the development server: 
 
-Now, you should be able to run the following command:
 > uwsgi --socket 127.0.0.1:5017 --wsgi-file main.py --callable app
 
-The output to terminal looks different, but you should now be running your Flask app on your server on port 5017, once again. Go to your virtual machine's public internet address in the browser, visible on the VM Instances overview page on the Google Cloud Console. Mine is http://34.159.224.162/. You won't see your API, unfortunately, but you will see "This page isn't working": your server isn't yet responding. Since HTTP uses port 80 as a standard, both our browser and Google's network settings expect us to be requesting from and listening on port 80, not 5017. To remedy this, we'll use a webserver called nginx. Kill the process in your terminal again (ctrl+c). We're almost there. 
+The output to terminal looks different, but you should now be running your Flask app on your server on port 5017, once again. Go to your virtual machine's public internet address in the browser, visible on the VM Instances overview page on the Google Cloud Console. Mine is http://34.159.224.162/. You won't see your API, unfortunately, but you will see an error of some kind. Since HTTP uses port 80 as a standard, both our browser and Google's network settings expect us to be requesting from and listening on port 80, not 5017. To remedy this, we'll use a webserver called nginx. Kill the process in your terminal again (ctrl+c). We're almost there. 
 
 Install nginx: 
 > sudo apt-get install nginx 
@@ -240,6 +239,8 @@ If you now navigate to your website's public IP address (found on the cloud cons
 As a final step, we have to start our Flask application again, using the same command as above: 
 
 > uwsgi --socket 127.0.0.1:5017 --wsgi-file main.py --callable app
+
+Reload the browser and you should see your favorite API response. 
 
 There you have it: you have rented a virtual machine from Google Cloud and set up your Flask server by hand. You have enormous control using this method, but that was a few more steps than the previous approach. For this service to be usable in production, you would need to do two additional steps (at a minimum). While the webserver nginx is now set up to always be running, the Flask application is running via the terminal right now. If your connection closes, if you shut off your home computer, the process will stop on the rented server. You would need to make this run automatically. Additionally, you would need to encrypt the connection, using HTTPS instead of HTTP. There are excellent instructions for how to do this [here](https://www.digitalocean.com/community/tutorials/how-to-serve-flask-applications-with-uwsgi-and-nginx-on-ubuntu-20-04), using a slightly different set up - but it should be close enough for you to make that work, if you would like to. 
 
