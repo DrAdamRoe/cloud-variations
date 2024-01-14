@@ -22,7 +22,10 @@ jobs:
         run:  python -m unittest -v tests/test_api.py
   # job to test against App Engine
   test-app-engine:
-    needs: build-and-test
+    needs: build-and-test    
+    permissions:
+      contents: 'read'
+      id-token: 'write'
     runs-on: ubuntu-22.04
     steps: 
       - name: Checkout
