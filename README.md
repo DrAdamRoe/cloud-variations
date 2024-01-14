@@ -463,16 +463,18 @@ and then you can continue as above, with `docker run`, `docker tag`, `docker pus
 - Push, check that it runs, and then check the workflow file and make sure that's up to date, too 
 - OS Versions, Action versions, Google ENV variables... 
 - https://console.cloud.google.com/apis/library/appengine.googleapis.com (for github actions)
-- Create service account for GitHub followed old permissions & create key, upload to GitHub
-- https://cloud.google.com/iam/docs/keys-create-delete
-
+- Enable workload identity federation: https://github.com/marketplace/actions/authenticate-to-google-cloud#direct-wif 
+  # gcloud iam workload-identity-pools create "github" --project="cloud-variations-spring24test" --location="global" --display-name="GitHub Actions Pool"
+  # 
 
 #### to start a new project/semester: 
 # - update project names in this file 
-# - download JSON credentials for default app engine service account, upload to GitHub
 # - enable app engine admin and cloud run admin apis: 
 #     gcloud services enable appengine.googleapis.com cloudbuild.googleapis.com
 # - add run admin role to project: 
 #     gcloud projects add-iam-policy-binding cloud-variations-fs2023-test --member=serviceAccount:cloud-variations-fs2023-test@appspot.gserviceaccount.com --role=roles/run.admin
-
+#  setup workload identity pools (https://github.com/marketplace/actions/authenticate-to-google-cloud#direct-wif)
+#     gcloud iam workload-identity-pools describe "github" --project="cloud-variations-spring24test" --location="global" --format="value(name)"
+#     gcloud iam workload-identity-pools providers create-oidc "my-repo"   --project="cloud-variations-spring24test"   --location="global"   --workload-identity-pool="github"   --display-name="My GitHub repo Provider"   --attribute-mapping="google.subject=assertion.sub,attribute.actor=assertion.actor,attribute.repository=assertion.repository"   --issuer-uri="https://token.actions.githubusercontent.com"
+#    gcloud iam workload-identity-pools providers describe "my-repo"   --project="cloud-variations-spring24test"   --location="global"   --workload-identity-pool="github"   --format="value(name)"
 --> 
