@@ -27,15 +27,16 @@ The goal of this section is to install and run our little web server locally on 
 ### Pre-Installed Requirements 
 Before you get started, you are expected to have some other software on your computer
 
-<!-- maybe: upgrade to 3.11.1 -->
-- Python 3.11 (tested with 3.11.4) 
+
+- Python 3.11 (tested with 3.11.7)
 - git 
-- [Google Cloud SDK](https://cloud.google.com/sdk/docs/quickstart), (tested with version 437.0.1)
+- [Google Cloud SDK](https://cloud.google.com/sdk/docs/quickstart), (tested with version 459.0.0)
 - An integrated development environment, like VS Code. 
 - [Docker](https://www.docker.com/products/docker-desktop) for building and running docker images locally
+- [Kubectl](https://kubernetes.io/docs/tasks/tools/), giving you a CLI for Kubernetes (this is optional)
 
 ### Install Locally   
-- mkdir WORKING_DIR && cd WORKING_DIR, with a directory name of your choice (e.g. cloud2023). 
+- mkdir WORKING_DIR && cd WORKING_DIR, with a directory name of your choice (e.g. cloud-variations). 
 - git clone this repository locally
 
 - Install a local python virtual environment with python 3.11 to work with, 
@@ -83,22 +84,22 @@ Now that you have a local version of our highly sophisticated API running, the g
 - If you have trouble with the local setup of the gCloud SDK, it is worth it to note that everything done here can be done in the browser, as well. You can still participate in the class and learn a lot, but the steps are not documented here -- you'll have to find that in the documentation online. 
 
 ### Prepare your Google Cloud Account
-In GCP, a Project is the top-level organizational element. You can learn more about it [here](https://cloud.google.com/storage/docs/projects) or elsewhere. We will use one project for the following examples, but feel free to create more, for instance, one project per variation, if you would like. The names are entirely up to you; you are encouraged to customize them to your liking. 
+In GCP, a Project is the top-level organizational element. You can learn more about it [here](https://cloud.google.com/storage/docs/projects) or elsewhere. We will use one project for the following examples, but feel free to create more, for instance, one project per variation, if you would like. The names are entirely up to you; you are encouraged to customize them to your liking. You may also need to authenticate early on in this process or be asked other questions by the CLI. 
 
 
 Create a project on Google Cloud Platform: 
 
- `gcloud projects create cloud-variations-fs2023-test --name="Cloud Variations"`
+ `gcloud projects create cloud-variations --name="Cloud Variations"`
 
 You should be able to see this in your dashboard on Google Cloud after a few seconds. Now, we're ready for our first deployment! You can also get information from the CLI using `describe`, e.g. 
 
-`gcloud projects describe cloud-variations-fs2023-test`
+`gcloud projects describe cloud-variations`
 
 which will show information including status, name, and the projectId, which we will need in the next step. 
 
 Once creating this project, set your local environment to default to using that new project: 
 
-`gcloud config set project cloud-variations-fs2023-test`
+`gcloud config set project cloud-variations`
 
 This ensures that it will not conflict with any other projects you may have on GCP.
 
@@ -110,11 +111,9 @@ Note that this step is a little bit finnicky. If you have errors here, there is 
 
 ![gcloud billing account for project not found](./documentation/glcoud-projects-enable-cloudbuild.png) 
 
-The goal is to associate the Education Credits you have received with this project. The easiest way to do this is [on the dashboard in the browser](https://cloud.google.com/billing/docs/how-to/modify-project#to_change_the_projects_account_do_the_following), but it can be done via the CLI as well. 
+The goal is to associate the Education Credits you have received with this project. You can do this either [on the dashboard in the browser](https://cloud.google.com/billing/docs/how-to/modify-project#to_change_the_projects_account_do_the_following) or via the [CLI](https://cloud.google.com/sdk/gcloud/reference/billing) which allow you to do this from the command line. First, use `gcloud billing accounts list` to get the ACCOUNT_ID of the account you want to use; if you are new to gCloud it should be the only account listed. The ID has a format like 0X0X0X-0X0X0X-0X0X0X. Then, link that billing account to your project, e.g. 
 
-As of writing, there are [commands in the beta version of the gcloud SDK API](https://cloud.google.com/sdk/gcloud/reference/billing) which allow you to do this from the command line. First, use `gcloud beta billing accounts list` to get the ACCOUNT_ID of the account you want to use; if you are new to gCloud it should be the only account listed. The ID has a format like 0X0X0X-0X0X0X-0X0X0X. Then, link that billing account to your project, e.g. 
-
-`gcloud beta billing projects link cloud-variations-fs2023-test --billing-account 0X0X0X-0X0X0X-0X0X0X`
+`gcloud billing projects link cloud-variations --billing-account 0X0X0X-0X0X0X-0X0X0X`
 
 Now you should be able to enable the cloud build API without running into errors: 
 
@@ -130,13 +129,17 @@ Enable the cloud functions service on your project:
 
 `gcloud services enable cloudfunctions.googleapis.com`
 
+Enable Google Artifact Registry, a dedicated type of storage which we will configure to store Docker images (similar to Docker Hub, if you are familiar with it). This is used behind the scenes by cloud functions, and we will use it explicitly when we build our own images later:
+
+`gcloud services enable artifactregistry.googleapis.com`
+
 And now we will deploy a single _function_ from our application, the function `index()` found in the file `api/hello_cloud.py`: 
 
-`gcloud functions deploy hello_cloud --runtime python311 --trigger-http --allow-unauthenticated --max-instances 2 --set-build-env-vars=GOOGLE_FUNCTION_SOURCE=api/hello_cloud.py --region=europe-west3`
+`gcloud functions deploy hello_cloud --runtime python311 --trigger-http --allow-unauthenticated --max-instances 2 --set-build-env-vars=GOOGLE_FUNCTION_SOURCE=api/hello_cloud.py --region=europe-west3 --docker-registry=artifact-registry`
 
-This reads as: "Hey Google, deploy a Cloud Function for me called hello_cloud, which is both the name of the function that I've defined as well as the name that you'll use to identify the function. That function in the file api/hello_cloud.py. It should use the Python 3.11 runtime, anyone can access it on the internet without authentication, but only allow 2 instance to not run up my bill. Run the function if there is an HTTP request to the URL". 
+This reads as: "Hey Google, deploy a Cloud Function for me called hello_cloud, which is both the name of the function that I've defined as well as the name that you'll use to identify the function. That function is in the file api/hello_cloud.py, which you can build into some executable stored in the artifact registry. It should use the Python 3.11 runtime, anyone can access it on the internet without authentication, but only allow 2 instance to not run up my bill. Run the function if there is an HTTP request to the URL. ". 
 
-You should be able to now see your function running live on the internet now, at the url listed in the output of the command or in the console. It has a format like https://{Region}-{ProjectID}.cloudfunctions.net/{function-name}, in my case https://europe-west3-cloud-variations-fs2023-test.cloudfunctions.net/hello_cloud. 
+You should be able to now see your function running live on the internet now, at the url listed in the output of the command or in the console. It has a format like https://{Region}-{ProjectID}.cloudfunctions.net/{function-name}, in my case https://europe-west3-cloud-variations.cloudfunctions.net/hello_cloud. 
 
 And there we have it: you can run a function on Google's Cloud without any concern for how to manage the server, just setting a few basic parameters.  
 
@@ -157,8 +160,9 @@ Once there, click on "Create Instance". This will walk you through the process o
 
 In particular: 
  
- * Set the Region to `europe-west3` (Frankfurt)
+ * Set the Region to `europe-west10` (Berlin)
  * Set the Machine Type to `e2-micro` (2 CPUs, 1GB RAM
+ * VM Provisioning Model should be "Standard" 
  * Make sure the Boot Disk is set to `Debian 11` (Bullseye)
  * Set the Firewall to "Allow HTTP Traffic" 
  
@@ -170,7 +174,7 @@ Once this has been created, you should see an overview of your VM Instances (the
 
  ![VM Instances](./documentation/vm-instances.png) VM Instances.
 
-Now, we want to set this up to run our software. The next step is to SSH into your server. There are many ways to do this. Click on the "SSH" button to see options. "Open in Browser Window" will open a new browser window running a virtual terminal, giving you command-line access to your server. This is a fancy option which Google Cloud offers, and I would recommend trying it. You can also open this from your local command line (click on `view glcoud command` to see what you would type into your local terminal), or of course good old fashioned `ssh` from your local computer. Once in, poke around your computer a bit. The command `python3 --version` will show you that a version of Python is installed (I see 3.9.2), and `which git` will return empty, showing that git is not installed. Note that this is the wrong version of Python -- we are using 3.11 everywhere else -- but it seems to work. You can upgrade the Python version on your virtual machine yourself, as an exercise in system administration. 
+Now, we want to set this up to run our software. The next step is to SSH into your server. There are many ways to do this. Click on the "SSH" button to see options. "Open in Browser Window" will open a new browser window running a virtual terminal, giving you command-line access to your server. This is a fancy option which Google Cloud offers, and I would recommend trying it. You can also open this from your local command line (click on `view gcloud command` to see what you would type into your local terminal), or of course good old fashioned `ssh` from your local computer. Once in, poke around your computer a bit. The command `python3 --version` will show you that a version of Python is installed (I see 3.9.2), and `which git` will return empty, showing that git is not installed. Note that this is the wrong version of Python -- we are using 3.11 everywhere else -- but it seems to work. You can upgrade the Python version on your virtual machine yourself, as an exercise in system administration. 
 
 Let's start by installing git and well as venv: 
 
@@ -188,19 +192,17 @@ Now, you should be able to run your app. Expose it on port 5017:
 
 Your flask app is now running on a computer in the cloud, but it is not accessible on the internet yet. The port we are running on, 5017, is not a standard port. Use ctrl+c to kill the process. 
 
-What we will do next is set up our environment to run a web server on the public internet. So far, we have a Debian Linux operating system running on Google Cloud's infrastructure, and we have our code on it, which we are able to run. A combination of steps is necessary to run our server. You may have noticed the big red warning saying "do not do this in production, use WSGI instead.". That is what we'll do. To do this, we have to install a few more things:
+What we will do next is set up our environment to run a web server on the public internet. So far, we have a Debian Linux operating system running on Google Cloud's infrastructure, and we have our code on it, which we are able to run. A combination of steps is necessary to run our server. You may have noticed the big red warning saying "do not do this in production, use WSGI instead.". That is what we'll do. We can install a production-ready Python server, uWSGI. This is a best-practice, and it is enforced by the security practices on the infrastructure we have rented and set up so far. 
 
-First, we need some system-wide build tools: 
-> sudo apt-get install build-essential python3-dev 
+Install the package: 
 
-Then, we can install a production-ready Python server, uWSGI. This is a best-practice, and it is enforced by the security practices on the infrastructure we have rented and set up so far. 
+> pip install pyuwsgi 
 
-> pip install --version uWSGI==2.0.21
+Now, you should be able to run the following command, using a production-ready server in place of the development server: 
 
-Now, you should be able to run the following command:
 > uwsgi --socket 127.0.0.1:5017 --wsgi-file main.py --callable app
 
-The output to terminal looks different, but you should now be running your Flask app on your server on port 5017, once again. Go to your virtual machine's public internet address in the browser, visible on the VM Instances overview page on the Google Cloud Console. Mine is http://34.159.224.162/. You won't see your API, unfortunately, but you will see "This page isn't working": your server isn't yet responding. Since HTTP uses port 80 as a standard, both our browser and Google's network settings expect us to be requesting from and listening on port 80, not 5017. To remedy this, we'll use a webserver called nginx. Kill the process in your terminal again (ctrl+c). We're almost there. 
+The output to terminal looks different, but you should now be running your Flask app on your server on port 5017, once again. Go to your virtual machine's public internet address in the browser, visible on the VM Instances overview page on the Google Cloud Console. Mine is http://34.159.224.162/. You won't see your API, unfortunately, but you will see an error of some kind. Since HTTP uses port 80 as a standard, both our browser and Google's network settings expect us to be requesting from and listening on port 80, not 5017. To remedy this, we'll use a webserver called nginx. Kill the process in your terminal again (ctrl+c). We're almost there. 
 
 Install nginx: 
 > sudo apt-get install nginx 
@@ -238,6 +240,8 @@ As a final step, we have to start our Flask application again, using the same co
 
 > uwsgi --socket 127.0.0.1:5017 --wsgi-file main.py --callable app
 
+Reload the browser and you should see your favorite API response. 
+
 There you have it: you have rented a virtual machine from Google Cloud and set up your Flask server by hand. You have enormous control using this method, but that was a few more steps than the previous approach. For this service to be usable in production, you would need to do two additional steps (at a minimum). While the webserver nginx is now set up to always be running, the Flask application is running via the terminal right now. If your connection closes, if you shut off your home computer, the process will stop on the rented server. You would need to make this run automatically. Additionally, you would need to encrypt the connection, using HTTPS instead of HTTP. There are excellent instructions for how to do this [here](https://www.digitalocean.com/community/tutorials/how-to-serve-flask-applications-with-uwsgi-and-nginx-on-ubuntu-20-04), using a slightly different set up - but it should be close enough for you to make that work, if you would like to. 
 
 
@@ -259,9 +263,7 @@ Now, we can deploy our app! The application configuration is entirely described 
 
 `gcloud app deploy app-engine.yaml`
 
-If you are asked for a location, choose `europe-west3` (Frankfurt), which is number 13. 
-
-And there we have it: your app is deployed! Look at that yaml file and see what we need to describe the infrastructure: a runtime (Python version), an instance class (the size of the VM we will us, in this case, [F1](https://cloud.google.com/appengine/docs/standard), with 384 MB of RAM), and some routing rules - similar to what we would need to define for a web server application like nginx, Caddy, or Apache. This tells app engine to respond to any request with the response of our application (as opposed to a redirect request, serving a static file, or an error, for instance. In this variation, we are able to specify resources (like the compute instance size), but still are not concerned with things like the underlying operating system. 
+And there we have it: your app is deployed! Look at that yaml file and see what we need to describe the infrastructure: a runtime (Python version), an instance class (the amount of resources allocated, in this case, [F1](https://cloud.google.com/appengine/docs/standard), with 384 MB of RAM, 600 MHz of processing and a limit of 2 workers), and some routing rules - similar to what we would need to define for a web server application like nginx, Caddy, or Apache. This tells app engine to respond to any request with the response of our application (as opposed to a redirect request, serving a static file, or an error, for instance). In this variation, we are able to specify resources (like the compute instance size), but still are not concerned with things like the underlying operating system. 
 
 ## Intermission: Containerize the Application
 
@@ -277,21 +279,15 @@ and run it locally:
 
 `docker run --publish 5017:5022 hello-cloud`
 
-Note that if you are on a Mac with an ARM processor, such as an M1 or M2 MacBook Pro, the container you build with the above command will not run on more standard x86 Intel processors, which are found, for example, on the cloud. So much for Docker's old sloagn "Build Once, Run Anywhere". To resolve this, build your docker container with the additional flag `--platform linux/amd64` if you are on an ARM Mac. You'll get a warning when running that image locally, but the same container will then work both locally and on the cloud (it will not be very efficient locally, but that is fine for this tutorial).
+Note that if you are on a Mac with an ARM processor, such as an M1 or M2 MacBook Pro, the container you build with the above command will not run on more standard x86 Intel processors, which are found, for example, on the cloud. So much for Docker's old slogan "Build Once, Run Anywhere". To resolve this, build your docker container with the additional flag `--platform linux/amd64` if you are on an ARM Mac. You'll get a warning when running that image locally, but the same container will then work both locally and on the cloud (it will not be very efficient locally, but that is fine for this tutorial).
 
 At this point, you should be able to again make a request locally, via `curl localhost:5017` or by going to the browser. 
 
-At this stage it is worth it to have a look at our Dockerfile, even if you aren't very familiar with Docker. We first define which base image we are using - in this case, an imagine provided by the Python Organization built on top of Debian 11 (codename bullseye). This gives us an operating system and everything we need to run Python 3.11. Then, we copy files from our local development environment into Docker's working area, and after that, we do the same thing as we do locally without Docker: install packages, set an environment variable, and run the app. Just this time, it is running as a Docker container on our own computer. 
+At this stage it is worth it to have a look at our Dockerfile, even if you aren't very familiar with Docker. We first define which base image we are using - in this case, an imagine provided by the Python Organization built on top of Debian 11 (codename bullseye). This gives us an operating system and everything we need to run Python 3.11. Then, we copy files from our local development environment into Docker's working area, and after that, we do the same thing as we do locally without Docker: install packages, set an environment variable, and run the app. Just this time, it is running as a Docker container on our own computer. The Docker Desktop app is a good way to explore Docker's options too. 
 
 ### Push the Image to Google Cloud 
 
-In this step, we will push our image to Google Artifact Registry -- a dedicated type of storage which we will configure to store Docker images (similar to Docker Hub, if you are familiar with it). 
-
-Start by Enabling the Artifact Registry:
-
-`gcloud services enable artifactregistry.googleapis.com`
-
-Now, we'll push your Docker Image to Google's Artifact Repository. To do this, we will use the tool provided by gCloud to authorize yourself on Docker on your machine giving you permissions to push to your Google Cloud Artifact Registry: 
+Now that we've built an image locally, we'll push that Docker Image to Google's Artifact Repository. To do this, we will use the tool provided by gCloud to authorize yourself on Docker on your machine giving you permissions to push to your Google Cloud Artifact Registry: 
 
 `gcloud auth configure-docker europe-west3-docker.pkg.dev`
 
@@ -309,7 +305,9 @@ And finally, push it to Google's Artifact Repository:
 
 `docker push europe-west3-docker.pkg.dev/cloud-variations/hello-cloud/hello-cloud:latest`
 
-Phew. We've built a Docker image locally and pushed it to Google Cloud. You can see the fruits of your labors (and browse the directory structure) over on the dashboard at https://console.cloud.google.com/gcr/images/{your-project-name}. 
+Phew. We've built a Docker image locally and pushed it to Google Cloud. You can see the fruits of your labors (and browse the directory structure) over on the dashboard at https://console.cloud.google.com/artifacts. You should be able to see a container called hello-cloud (that you just made), as well as something called "gcf-artifacts" which was created when we used Google Cloud Functions earlier. 
+
+Next, we can choose from a myriad of ways to run the image we have just made ourselves. 
 
 ## Variation: Serverless Container Management 
 
@@ -336,12 +334,7 @@ Once you are done, remember to cleanup by deleting the service -- otherwise it c
 
 We've already run some high-level managed versions of our API, and now we are going to take things a bit more into our own hands, running our service in Kubernetes. We will use Google Kubernetes Engine, Google's managed Kubernetes cluster, so we only have to _use_ Kubernetes, not host it ourselves. 
 
-! Note that this may get a little bit tricky on your local machine. If you have trouble with further installation and configuration, you access the [gCloud Shell](https://cloud.google.com/shell) through your browser, giving you a command line interface allowing you to interact with your project. 
-
-### Additional Software 
-
-- [Install kubectl](https://kubernetes.io/docs/tasks/tools/), the command line interface for interacting with Kubernetes itself. 
-
+Note that this may get a little bit tricky on your local machine. If you have trouble with further installation and configuration, you access the [gCloud Shell](https://cloud.google.com/shell) through your browser, giving you a command line interface allowing you to interact with your project. 
 
 ### Run our container using Kubernetes
 Now it's time to run our Docker container on our own Kubernetes Cluster. 
@@ -362,7 +355,7 @@ You may crash out with an error that says _Please specify location_. Let's set i
 
 `gcloud config set compute/zone europe-west3-b`
 
-and try again to create the cluster with the above command. Now you should get a few yellow warnings, but no red errors. 
+and try again to create the cluster with the above command. Now you might get a few yellow warnings, but no red errors. 
 
 And now we are ready to interact with our Kubernetes cluster!
 
@@ -390,6 +383,7 @@ Before you leave: shut off your Kube cluster, otherwise you'll run out of money,
 
 `gcloud container clusters delete hello-cloud-cluster`
 
+If you would like to dig deeper into Kubernetes, I recommend setting up [minikube](https://minikube.sigs.k8s.io/docs/start/) on your laptop to have a playground without running up big cloud bills. 
 
 ## Cleanup! 
 
@@ -444,4 +438,41 @@ Once you have followed the instructions there, the following build command shoul
 
 and then you can continue as above, with `docker run`, `docker tag`, `docker push`, and finally `gcloud run deploy`. Note that the local performance will be degraded with this setup, but that should be fine for this hello-world app. There are more sophisticated approaches for building for multiple architectures. 
 
+<!-- Maintenance Notes 
 
+# Before You Start 
+- Check for PRs from students 
+- Check for issues in repo 
+- Make sure everything still works in GitHub actions (request and link new billing account if necessary)
+- clean project needs new key: https://cloud.google.com/iam/docs/keys-create-delete 
+
+# Upgrade Versions 
+- Choose latest-and-greatest stable python version; install via download page and update path if necessary.
+- Check if everything works locally (instructions above)
+- pip install --upgrade pip (as always)
+- pip list --outdated 
+- pip install Flask==2.2.3 // maybe 3.0 soon?
+
+- Upgrade Python version in README, workflow.yaml, Dockerfile, app-engine.yaml
+
+- gcloud components update 
+- update Kubectl version
+- run through instructions manually locally
+
+# When you think you're done...
+- Push, check that it runs, and then check the workflow file and make sure that's up to date, too 
+- OS Versions, Action versions, Google ENV variables... 
+- https://console.cloud.google.com/apis/library/appengine.googleapis.com (for github actions)
+- Create service account for GitHub followed old permissions & create key, upload to GitHub
+- https://cloud.google.com/iam/docs/keys-create-delete
+
+
+#### to start a new project/semester: 
+# - update project names in this file 
+# - download JSON credentials for default app engine service account, upload to GitHub
+# - enable app engine admin and cloud run admin apis: 
+#     gcloud services enable appengine.googleapis.com cloudbuild.googleapis.com
+# - add run admin role to project: 
+#     gcloud projects add-iam-policy-binding cloud-variations-fs2023-test --member=serviceAccount:cloud-variations-fs2023-test@appspot.gserviceaccount.com --role=roles/run.admin
+
+--> 

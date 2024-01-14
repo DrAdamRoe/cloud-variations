@@ -1,4 +1,4 @@
-name: Build and Test Flask App 
+name: Test The Cloud Variations (somewhat)
 
 on: [push]
 
@@ -6,15 +6,14 @@ jobs:
   build-and-test:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Setup Python 3.11.x
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
           python-version: 3.11
-          architecture: x64
       - name: Display Python Version (should be 3.11.x)
-        run: python -c "import sys; print(sys.version)"
-      - name: Install dependencies
+        run: python --version
+      - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
@@ -27,14 +26,14 @@ jobs:
     runs-on: ubuntu-22.04
     steps: 
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Authorize GCP
-        uses: 'google-github-actions/auth@v1'
+        uses: 'google-github-actions/auth@v2'
         with: 
-            credentials_json: ${{ secrets.JSON_CREDENTIALS_fs2023_test }}  
+            credentials_json: ${{ secrets.JSON_CREDENTIALS_spring2024 }}  
       - name: Deploy to Google App Engine
         id: deploy-gae
-        uses: google-github-actions/deploy-appengine@v1
+        uses: google-github-actions/deploy-appengine@v2
         with:
           deliverables: app-engine.yaml
       - name: Get response from Google App Engine deployment 
@@ -53,18 +52,18 @@ jobs:
     runs-on: ubuntu-22.04
     steps: 
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Authorize GCP
-        uses: 'google-github-actions/auth@v1'
+        uses: 'google-github-actions/auth@v2'
         with: 
-          credentials_json: ${{ secrets.JSON_CREDENTIALS_fs2023_test }}  
+          credentials_json: ${{ secrets.JSON_CREDENTIALS_spring2024 }}  
       - name: Deploy to Google Cloud Functions
         id: deploy-functions
-        uses: google-github-actions/deploy-cloud-functions@v1
+        uses: google-github-actions/deploy-cloud-functions@v2
         with:
           name: hello_cloud
           build_environment_variables: GOOGLE_FUNCTION_SOURCE=api/hello_cloud.py
-          runtime: python39
+          runtime: python311
           region: europe-west3
       - name: Get response from Google Cloud Functions deployment 
         run: |
@@ -81,36 +80,36 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Authorize GCP
-        uses: 'google-github-actions/auth@v1'
+        uses: 'google-github-actions/auth@v2'
         with: 
-          credentials_json: ${{ secrets.JSON_CREDENTIALS_fs2023_test }}  
+          credentials_json: ${{ secrets.JSON_CREDENTIALS_spring2024 }}  
       - name: Setup Cloud SDK
-        uses: google-github-actions/setup-gcloud@v1
+        uses: google-github-actions/setup-gcloud@v2
       - name: Authorize Docker push
         run: gcloud auth configure-docker europe-west3-docker.pkg.dev
 
       - name: Build and Push Container
         run: |
-          docker build --tag europe-west3-docker.pkg.dev/cloud-variations-fs2023-test/hello-cloud/hello-cloud:latest .
-          docker push europe-west3-docker.pkg.dev/cloud-variations-fs2023-test/hello-cloud/hello-cloud:latest
+          docker build --tag europe-west3-docker.pkg.dev/cloud-variations-spring24test/hello-cloud/hello-cloud:latest .
+          docker push europe-west3-docker.pkg.dev/cloud-variations-spring24test/hello-cloud/hello-cloud:latest
   test-run:
     needs: build-container
     runs-on: ubuntu-22.04
     steps: 
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Authorize GCP
-        uses: 'google-github-actions/auth@v1'
+        uses: 'google-github-actions/auth@v2'
         with: 
-          credentials_json: ${{ secrets.JSON_CREDENTIALS_fs2023_test }}        
+          credentials_json: ${{ secrets.JSON_CREDENTIALS_spring2024 }}        
       - name: Deploy to Google Cloud Run
         id: deploy-run
-        uses: google-github-actions/deploy-cloudrun@v1
+        uses: google-github-actions/deploy-cloudrun@v2
         with:
           service: hello-cloud-run
-          image: europe-west3-docker.pkg.dev/cloud-variations-fs2023-test/hello-cloud/hello-cloud:latest
+          image: europe-west3-docker.pkg.dev/cloud-variations-spring24test/hello-cloud/hello-cloud:latest
           region: europe-west3
           flags: --port=5022 --allow-unauthenticated
       - name: Get response from Google Cloud Run deployment 
@@ -122,10 +121,3 @@ jobs:
         if: ${{ !contains(env.GCR_CURL_RESPONSE, 'Hello, Cloud') }}
         run: exit 1
 
-#### to start a new project/semester: 
-# - update project names in this file 
-# - download JSON credentials for default app engine service account, upload to GitHub
-# - enable app engine admin and cloud run admin apis: 
-#     gcloud services enable appengine.googleapis.com cloudbuild.googleapis.com
-# - add run admin role to project: 
-#     gcloud projects add-iam-policy-binding cloud-variations-fs2023-test --member=serviceAccount:cloud-variations-fs2023-test@appspot.gserviceaccount.com --role=roles/run.admin

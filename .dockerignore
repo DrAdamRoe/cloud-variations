@@ -9,3 +9,4 @@ documentation/
 app-engine.yaml
 README.md
 .gcloudignore
+gha-creds-*.json
