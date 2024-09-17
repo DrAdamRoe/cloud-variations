@@ -84,8 +84,14 @@ Now that you have a local version of our highly sophisticated API running, the g
 - If you have trouble with the local setup of the gCloud SDK, it is worth it to note that everything done here can be done in the browser, as well. You can still participate in the class and learn a lot, but the steps are not documented here -- you'll have to find that in the documentation online. 
 
 ### Prepare your Google Cloud Account
-In GCP, a Project is the top-level organizational element. You can learn more about it [here](https://cloud.google.com/storage/docs/projects) or elsewhere. We will use one project for the following examples, but feel free to create more, for instance, one project per variation, if you would like. The names are entirely up to you; you are encouraged to customize them to your liking. You may also need to authenticate early on in this process or be asked other questions by the CLI. 
+In GCP, a Project is the top-level organizational element. You can learn more about it [here](https://cloud.google.com/storage/docs/projects) or elsewhere. We will use one project for the following examples, but feel free to create more, for instance, one project per variation, if you would like.
 
+- The Project-ID (see `cloud-variations` below) **must be unique!** Since this example is already taken, customize your ID to your liking, e.g. `cloud-variations-YourNameHere`.
+- The display `name` on the other hand, is entirely up to you; you are encouraged to customize them to your liking.
+
+You may also need to authenticate early on in this process or be asked other questions by the CLI. 
+
+---
 
 Create a project on Google Cloud Platform: 
 
