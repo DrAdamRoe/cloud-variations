@@ -184,17 +184,17 @@ Now, we want to set this up to run our software. The next step is to SSH into yo
 
 Let's start by installing git and well as venv: 
 
-> sudo apt-get install git python3-venv
+> `sudo apt-get install git python3-venv`
 
 Not that this step may take a while. Once it is done, clone this very repository to your new server: 
 
-> git clone https://github.com/DrAdamRoe/cloud-variations.git
+> `git clone https://github.com/DrAdamRoe/cloud-variations.git`
 
 At this stage, you should be able to setup and run python using the same commands as you did locally (using the Linux/macOS instructions above): create a virtual environment, activate it, install requirements, and set FLASK_APP environment variable.
 
 Now, you should be able to run your app. Expose it on port 5017:
 
-> flask run --port=5017
+> `flask run --port=5017`
 
 Your flask app is now running on a computer in the cloud, but it is not accessible on the internet yet. The port we are running on, 5017, is not a standard port. Use ctrl+c to kill the process. 
 
@@ -202,16 +202,16 @@ What we will do next is set up our environment to run a web server on the public
 
 Install the package: 
 
-> pip install pyuwsgi 
+> `pip install pyuwsgi` 
 
 Now, you should be able to run the following command, using a production-ready server in place of the development server: 
 
-> uwsgi --socket 127.0.0.1:5017 --wsgi-file main.py --callable app
+> `uwsgi --socket 127.0.0.1:5017 --wsgi-file main.py --callable app`
 
 The output to terminal looks different, but you should now be running your Flask app on your server on port 5017, once again. Go to your virtual machine's public internet address in the browser, visible on the VM Instances overview page on the Google Cloud Console. Mine is http://34.159.224.162/. You won't see your API, unfortunately, but you will see an error of some kind. Since HTTP uses port 80 as a standard, both our browser and Google's network settings expect us to be requesting from and listening on port 80, not 5017. To remedy this, we'll use a web server called nginx. Kill the process in your terminal again (ctrl+c). We're almost there. 
 
 Install nginx: 
-> sudo apt-get install nginx 
+> `sudo apt-get install nginx`
 
 We'll have to use the sudo command in front of everything we will do here to configure nginx. Once installed, the server should be running automatically.
 
@@ -219,32 +219,32 @@ If you navigate to your computer's IP address in the browser, you should now be 
 
 Copy the config file into the folder where nginx looks for configs: 
 
-> sudo cp nginx.conf /etc/nginx/sites-available/cloudvariations
+> `sudo cp nginx.conf /etc/nginx/sites-available/cloudvariations`
 
 Then link that configuration from the sites-enabled folder: 
 
-> sudo ln -s /etc/nginx/sites-available/cloudvariations /etc/nginx/sites-enabled/cloudvariations
+> `sudo ln -s /etc/nginx/sites-available/cloudvariations /etc/nginx/sites-enabled/cloudvariations`
 
 Now we have to remove the default configuration which nginx shipped with: 
 
-> sudo unlink /etc/nginx/sites-available/default
+> `sudo unlink /etc/nginx/sites-available/default`
 
-> sudo rm /etc/nginx/sites-enabled/default 
+> `sudo rm /etc/nginx/sites-enabled/default`
 
 and we should be in good shape. 
 
 Test the configuration using: 
-> sudo nginx -t 
+> `sudo nginx -t`
 
 This will catch syntax errors and some other consistency issues. If it is OK and successful, we can now finally restart nginx, which will reload the configuration files: 
 
-> sudo systemctl restart nginx
+> `sudo systemctl restart nginx`
 
 If you now navigate to your website's public IP address (found on the cloud console next to that VM), you should see an error served by nginx: "502 Bad Gateway". This is actually a good sign: it means that your rented computer is forwarding HTTP requests on port 80 to nginx, which is trying to respond with whatever application is running internally. Since nothing is running right now, there's an error. 
 
 As a final step, we have to start our Flask application again, using the same command as above: 
 
-> uwsgi --socket 127.0.0.1:5017 --wsgi-file main.py --callable app
+> `uwsgi --socket 127.0.0.1:5017 --wsgi-file main.py --callable app`
 
 Reload the browser and you should see your favorite API response. 
 
