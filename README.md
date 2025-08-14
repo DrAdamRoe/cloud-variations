@@ -39,11 +39,11 @@ Before you get started, you are expected to have some other software on your com
 - mkdir WORKING_DIR && cd WORKING_DIR, with a directory name of your choice (e.g. cloud-variations). 
 - git clone this repository locally
 
-- Install a local python virtual environment with python 3.11 to work with, 
+- Install a local python virtual environment with python 3.13 to work with,
 
-    macOS/Linux: `python3.11 -m venv venv` 
+    macOS/Linux: `python3.13 -m venv venv`
     
-    Windows: `c:\Python311\python -m venv c:\path\to\myenv`
+    Windows: `c:\Python313\python -m venv c:\path\to\myenv`
 
 - Activate your virtual environment for this project: 
    
