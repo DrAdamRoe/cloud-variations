@@ -2,7 +2,7 @@ runtime: python311
 
 instance_class: F1
 
-basic_scaling:
+automatic_scaling:
   max_instances: 2
   idle_timeout: 5m
 
