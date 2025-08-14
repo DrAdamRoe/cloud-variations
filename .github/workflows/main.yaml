@@ -20,6 +20,7 @@ jobs:
       # this is only a simple test of the flask app itself
       - name: Test 
         run:  python -m unittest -v tests/test_api.py
+
   # job to test against App Engine
   test-app-engine:
     needs: build-and-test
@@ -59,12 +60,13 @@ jobs:
           credentials_json: ${{ secrets.JSON_CREDENTIALS_fall2025 }}
       - name: Deploy to Google Cloud Functions
         id: deploy-functions
-        uses: google-github-actions/deploy-cloud-functions@v2
+        uses: google-github-actions/deploy-cloud-functions@v3
         with:
           name: hello_cloud
           build_environment_variables: GOOGLE_FUNCTION_SOURCE=api/hello_cloud.py
           runtime: python313
           region: europe-west6
+          environment: GEN_2
       - name: Get response from Google Cloud Functions deployment 
         run: |
             curl "${{ steps.deploy-functions.outputs.url }}"
