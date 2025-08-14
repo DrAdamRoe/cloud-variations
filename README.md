@@ -447,6 +447,17 @@ and then you can continue as above, with `docker run`, `docker tag`, `docker pus
 - Make sure everything still works in GitHub actions (request and link new billing account if necessary)
 - clean project needs new key: https://cloud.google.com/iam/docs/keys-create-delete 
 
+#### to start a new project/semester: 
+# - update project names in this file 
+# - download JSON credentials for default app engine service account, upload to GitHub
+# - enable app engine admin and cloud run admin apis: 
+#     gcloud services enable appengine.googleapis.com cloudbuild.googleapis.com
+# - add run admin role to project: 
+#     gcloud projects add-iam-policy-binding cloud-variations-fs2023-test --member=serviceAccount:cloud-variations-fs2023-test@appspot.gserviceaccount.com --role=roles/run.admin
+
+--> 
+
+
 # Upgrade Versions 
 - Choose latest-and-greatest stable python version; install via download page and update path if necessary.
 - Check if everything works locally (instructions above)
@@ -466,14 +477,3 @@ and then you can continue as above, with `docker run`, `docker tag`, `docker pus
 - https://console.cloud.google.com/apis/library/appengine.googleapis.com (for github actions)
 - Create service account for GitHub followed old permissions & create key, upload to GitHub
 - https://cloud.google.com/iam/docs/keys-create-delete
-
-
-#### to start a new project/semester: 
-# - update project names in this file 
-# - download JSON credentials for default app engine service account, upload to GitHub
-# - enable app engine admin and cloud run admin apis: 
-#     gcloud services enable appengine.googleapis.com cloudbuild.googleapis.com
-# - add run admin role to project: 
-#     gcloud projects add-iam-policy-binding cloud-variations-fs2023-test --member=serviceAccount:cloud-variations-fs2023-test@appspot.gserviceaccount.com --role=roles/run.admin
-
---> 
