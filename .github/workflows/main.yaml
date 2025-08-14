@@ -90,12 +90,12 @@ jobs:
       - name: Setup Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
       - name: Authorize Docker push
-        run: gcloud auth configure-docker europe-west3-docker.pkg.dev
+        run: gcloud auth configure-docker europe-west6-docker.pkg.dev
 
       - name: Build and Push Container
         run: |
-          docker build --tag europe-west3-docker.pkg.dev/cloud-variations-spring24test/hello-cloud/hello-cloud:latest .
-          docker push europe-west3-docker.pkg.dev/cloud-variations-spring24test/hello-cloud/hello-cloud:latest
+          docker build --tag europe-west6-docker.pkg.dev/cloud-variations-fall25/hello-cloud/hello-cloud:latest .
+          docker push europe-west6-docker.pkg.dev/cloud-variations-fall25/hello-cloud/hello-cloud:latest
   test-run:
     needs: build-container
     runs-on: ubuntu-22.04
@@ -111,8 +111,8 @@ jobs:
         uses: google-github-actions/deploy-cloudrun@v2
         with:
           service: hello-cloud-run
-          image: europe-west3-docker.pkg.dev/cloud-variations-spring24test/hello-cloud/hello-cloud:latest
-          region: europe-west3
+          image: europe-west6-docker.pkg.dev/cloud-variations-fall25/hello-cloud/hello-cloud:latest
+          region: europe-west6
           flags: --port=5022 --allow-unauthenticated
       - name: Get response from Google Cloud Run deployment 
         run: |
