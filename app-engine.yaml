@@ -2,12 +2,13 @@ runtime: python311
 
 instance_class: F1
 
+basic_scaling:
+  max_instances: 2
+  idle_timeout: 5m
+
 handlers:
 - url: /.*
   secure: always
   redirect_http_response_code: 301
   script: auto
 
-  basic_scaling:
-    max_instances: 2
-    idle_timeout: 5m
