@@ -4,7 +4,7 @@ on: [push]
 
 jobs: 
   build-and-test:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - name: Setup Python 3.13.x
@@ -24,7 +24,7 @@ jobs:
   # job to test against App Engine
   test-app-engine:
     needs: build-and-test
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps: 
       - name: Checkout
         uses: actions/checkout@v4
@@ -50,7 +50,7 @@ jobs:
 # job to test against Functions 
   test-functions:
     needs: build-and-test
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps: 
       - name: Checkout
         uses: actions/checkout@v4
@@ -79,7 +79,7 @@ jobs:
 # job to test against Cloud Run
   build-container: 
     needs: build-and-test
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -98,7 +98,7 @@ jobs:
           docker push europe-west6-docker.pkg.dev/cloud-variations-fall25/hello-cloud/hello-cloud:latest
   test-run:
     needs: build-container
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps: 
       - name: Checkout
         uses: actions/checkout@v4
