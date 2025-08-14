@@ -454,7 +454,7 @@ and then you can continue as above, with `docker run`, `docker tag`, `docker pus
 #     gcloud services enable appengine.googleapis.com cloudbuild.googleapis.com
 # - add run admin role to project: 
 #     gcloud projects add-iam-policy-binding cloud-variations-fs2023-test --member=serviceAccount:cloud-variations-fs2023-test@appspot.gserviceaccount.com --role=roles/run.admin
-
+# - create the app manually so it can then be deployed automatically: gcloud app create
 --> 
 
 
