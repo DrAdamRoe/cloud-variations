@@ -28,9 +28,9 @@ The goal of this section is to install and run our little web server locally on 
 Before you get started, you are expected to have some other software on your computer
 
 
-- Python 3.11 (tested with 3.11.7)
+- Python 3.13 (tested with 3.13.5)
 - git 
-- [Google Cloud SDK](https://cloud.google.com/sdk/docs/quickstart), (tested with version 459.0.0)
+- [Google Cloud SDK](https://cloud.google.com/sdk/docs/install-sdk), (tested with version 534.0.0)
 - An integrated development environment, like VS Code. 
 - [Docker](https://www.docker.com/products/docker-desktop) for building and running docker images locally
 - [Kubectl](https://kubernetes.io/docs/tasks/tools/), giving you a CLI for Kubernetes (this is optional)
