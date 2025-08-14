@@ -2,6 +2,8 @@ runtime: python311
 
 instance_class: F1
 
+max_instances: 1
+
 handlers:
 - url: /.*
   secure: always
