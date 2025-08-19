@@ -32,8 +32,7 @@ Before you get started, you are expected to have some other software on your com
 - git 
 - [Google Cloud SDK](https://cloud.google.com/sdk/docs/install-sdk), (tested with version 534.0.0)
 - An integrated development environment, like VS Code. 
-- [Docker](https://www.docker.com/products/docker-desktop) for building and running docker images locally
-- [Kubectl](https://kubernetes.io/docs/tasks/tools/), giving you a CLI for Kubernetes (this is optional)
+- [Docker](https://www.docker.com/products/docker-desktop) for building and running docker images locally. 
 
 ### Install Locally   
 - mkdir WORKING_DIR && cd WORKING_DIR, with a directory name of your choice (e.g. cloud-variations). 
@@ -256,7 +255,7 @@ In this variation, we will use Google's Platform-as-Service offering, Google App
 
 Create an instance of an App, either from the CLI or through the dashboard. Be sure to get the projectId from the previous step: 
 
-`gcloud app create --project=cloud-variations --region=europe-west3`
+`gcloud app create --project=cloud-variations --region=europe-west6`
 
 again, you can check it's status at the CLI or the dashboard: 
 
@@ -284,31 +283,31 @@ and run it locally:
 
 `docker run --publish 5017:5022 hello-cloud`
 
-Note that if you are on a Mac with an ARM processor, such as an M1 or M2 MacBook Pro, the container you build with the above command will not run on more standard x86 Intel processors, which are found, for example, on the cloud. So much for Docker's old slogan "Build Once, Run Anywhere". To resolve this, build your docker container with the additional flag `--platform linux/amd64` if you are on an ARM Mac. You'll get a warning when running that image locally, but the same container will then work both locally and on the cloud (it will not be very efficient locally, but that is fine for this tutorial).
+Note that if you are on a Mac with an ARM processor, the container you build with the above command will not run on more standard x86 Intel processors, which are found, for example, on the cloud. So much for Docker's old slogan "Build Once, Run Anywhere". To resolve this, build your docker container with the additional flag `--platform linux/amd64` if you are on an ARM Mac. You'll get a warning when running that image locally, but the same container will then work both locally and on the cloud (it will not be very efficient locally, but that is fine for this tutorial).
 
-At this point, you should be able to again make a request locally, via `curl localhost:5017` or by going to the browser. 
+At this point, you should be able to again make a request locally, via `curl localhost:5017` or by going to the browser (for example, the Simple Browser built into VS Code).
 
-At this stage it is worth it to have a look at our Dockerfile, even if you aren't very familiar with Docker. We first define which base image we are using - in this case, an imagine provided by the Python Organization built on top of Debian 11 (codename bullseye). This gives us an operating system and everything we need to run Python 3.11. Then, we copy files from our local development environment into Docker's working area, and after that, we do the same thing as we do locally without Docker: install packages, set an environment variable, and run the app. Just this time, it is running as a Docker container on our own computer. The Docker Desktop app is a good way to explore Docker's options too. 
+At this stage it is worth it to have a look at our Dockerfile, even if you aren't very familiar with Docker. We first define which base image we are using - in this case, an imagine provided by the Python Organization built on top of Debian 13 (codename trixie). This gives us an operating system and everything we need to run Python 3.13. Then, we copy files from our local development environment into Docker's working area, and after that, we do the same thing as we do locally without Docker: install packages, set an environment variable, and run the app. Just this time, it is running as a Docker container on our own computer. The Docker Desktop app is a good way to explore Docker's options too.
 
 ### Push the Image to Google Cloud 
 
 Now that we've built an image locally, we'll push that Docker Image to Google's Artifact Repository. To do this, we will use the tool provided by gCloud to authorize yourself on Docker on your machine giving you permissions to push to your Google Cloud Artifact Registry: 
 
-`gcloud auth configure-docker europe-west3-docker.pkg.dev`
+`gcloud auth configure-docker europe-west6-docker.pkg.dev`
 
 Next, create a repository in the Artifact Registry for you to store your image in: 
 
-`gcloud artifacts repositories create hello-cloud --repository-format=docker --location=europe-west3`
+`gcloud artifacts repositories create hello-cloud --repository-format=docker --location=europe-west6`
 
 Note that the format "Docker" specifies that what type of artifact the repository should expect, a Docker Image. 
 
 Now you can tag your local image to push to a specific location, telling Docker where you will push it: to the repository you just created. You should replace `cloud-variations` with your project name: 
 
-`docker tag hello-cloud:latest europe-west3-docker.pkg.dev/cloud-variations/hello-cloud/hello-cloud:latest`
+`docker tag hello-cloud:latest europe-west6-docker.pkg.dev/cloud-variations/hello-cloud/hello-cloud:latest`
 
 And finally, push it to Google's Artifact Repository: 
 
-`docker push europe-west3-docker.pkg.dev/cloud-variations/hello-cloud/hello-cloud:latest`
+`docker push europe-west6-docker.pkg.dev/cloud-variations/hello-cloud/hello-cloud:latest`
 
 Phew. We've built a Docker image locally and pushed it to Google Cloud. You can see the fruits of your labors (and browse the directory structure) over on the dashboard at https://console.cloud.google.com/artifacts. You should be able to see a container called hello-cloud (that you just made), as well as something called "gcf-artifacts" which was created when we used Google Cloud Functions earlier. 
 
@@ -320,7 +319,7 @@ Sometimes cloud services feels like they were generated by putting random buzzwo
 
 We will create and deploy our new _service_, which will tell Cloud Run to run between 2 and 5 instances of our container based on the image we have built and pushed already. 
 
-`gcloud run deploy hello-cloud-run --image=europe-west3-docker.pkg.dev/cloud-variations/hello-cloud/hello-cloud:latest --port=5022 --region=europe-west3 --allow-unauthenticated --min-instances=2 --max-instances=5`
+`gcloud run deploy hello-cloud-run --image=europe-west6-docker.pkg.dev/cloud-variations/hello-cloud/hello-cloud:latest --port=5022 --region=europe-west6 --allow-unauthenticated --min-instances=2 --max-instances=5`
 
 This command should feel a bit like the one we used for the FaaS offering at the start, but with a bit more control. If your container runs locally but not on google cloud, you may need to change the build architecture. Have a look at the troubleshooting section below. 
 
@@ -330,12 +329,14 @@ Once you are done, remember to cleanup by deleting the service -- otherwise it c
 
 `gcloud run services delete hello-cloud-run`
 
-
 ## Variation: Managed Kubernetes Cluster
 
 We've already run some high-level managed versions of our API, and now we are going to take things a bit more into our own hands, running our service in Kubernetes. We will use Google Kubernetes Engine, Google's managed Kubernetes cluster, so we only have to _use_ Kubernetes, not host it ourselves. 
 
 Note that this may get a little bit tricky on your local machine. If you have trouble with further installation and configuration, you access the [gCloud Shell](https://cloud.google.com/shell) through your browser, giving you a command line interface allowing you to interact with your project. 
+
+First things first: go into Docker Dekstop and install and turn kubernetes on. Instructions can be found [here](https://docs.docker.com/desktop/features/kubernetes/#install-and-turn-on-kubernetes). Follow the first part, up to running the command `kubectl version` in your terminal. If that runs successfully, you now have kubernetes installed and running locally on your computer. Note that there are many other ways to install and run kubernetes locally, but this is the easiest by far. 
+
 
 ### Run our container using Kubernetes
 Now it's time to run our Docker container on our own Kubernetes Cluster. 
@@ -344,33 +345,30 @@ Enable the Google Kubernetes Engine API:
 
 `gcloud services enable container.googleapis.com`
 
-and install the authentication plugin for kubectl, which you can read about [here](https://cloud.google.com/blog/products/containers-kubernetes/kubectl-auth-changes-in-gke) if you are into kubernetes: 
+and install the authentication plugin for kubectl, which you can read about [here](https://cloud.google.com/kubernetes-engine/docs/how-to/cluster-access-for-kubectl#install_plugin) if you are into kubernetes: 
 
 `gcloud components install gke-gcloud-auth-plugin`
+ Create a Kubernetes cluster with one _node_ in our region of choice: 
 
-Now we can create a Kubernetes cluster: 
+`gcloud container clusters create hello-cloud-cluster --num-nodes=1 --location=europe-west6`
 
-`gcloud container clusters create hello-cloud-cluster --num-nodes=1`
+Now we have our very own Kubernetes _cluster_ running on google cloud!
 
-You may crash out with an error that says _Please specify location_. Let's set it to Frankfurt: 
-
-`gcloud config set compute/zone europe-west3-b`
-
-and try again to create the cluster with the above command. Now you might get a few yellow warnings, but no red errors. 
-
-And now we are ready to interact with our Kubernetes cluster!
-
-Now, try to find out a bit about your cluster using `kubectl describe`, for example `kubectl describe nodes`, which will show a whole lot of hard to understand information about your kubernetes cluster. 
+Try to find out a bit about your cluster using `kubectl describe nodes`, which will show a whole lot of hard to understand information about your kubernetes cluster. 
 
 Create a _deployment_ based on our Docker image, effectively declaring that we want our Docker image to run in Kubernetes:
 
-`kubectl create deployment hello-cloud-server --image=europe-west3-docker.pkg.dev/cloud-variations/hello-cloud/hello-cloud:latest`
+`kubectl create deployment hello-cloud-server --image=europe-west6-docker.pkg.dev/cloud-variations/hello-cloud/hello-cloud:latest`
 
-Once you have run this, it is running already, but we have to expose it on the network to see it, mapping our local port 5022 to the public port 80 for HTTP: 
+You can see that we now have a container running: 
+
+`kubectl desribe pods`
+
+Although it is now running, our application is only accessible internally to Kubernetes. Now we have to expose it on the network to see it, mapping our local port 5022 to the public port 80 for HTTP:
 
 `kubectl expose deployment hello-cloud-server --type LoadBalancer --port 80 --target-port 5022`
 
-You can now find the public (external) IP address of your application using: 
+This is called exposing a _service_. You can now find the public (external) IP address of your application using: 
 
 `kubectl get service hello-cloud-server`
 
@@ -382,9 +380,9 @@ Before you leave: shut off your Kubernetes cluster, otherwise you'll run out of 
 
 `kubectl delete service hello-cloud-server`
 
-`gcloud container clusters delete hello-cloud-cluster`
+`gcloud container clusters delete hello-cloud-cluster --location=europe-west6`
 
-If you would like to dig deeper into Kubernetes, I recommend setting up [minikube](https://minikube.sigs.k8s.io/docs/start/) on your laptop to have a playground without running up big cloud bills. 
+There is lots to learn about kubernetes, have a look at the cloud computing learning resources for a good starting point. 
 
 ## Cleanup! 
 
@@ -452,9 +450,12 @@ and then you can continue as above, with `docker run`, `docker tag`, `docker pus
 # - download JSON credentials for default app engine service account, upload to GitHub
 # - enable app engine admin and cloud run admin apis: 
 #     gcloud services enable appengine.googleapis.com cloudbuild.googleapis.com
-# - add run admin role to project: 
+# - add run admin to project: 
 #     gcloud projects add-iam-policy-binding cloud-variations-fs2023-test --member=serviceAccount:cloud-variations-fs2023-test@appspot.gserviceaccount.com --role=roles/run.admin
 # - create the app manually so it can then be deployed automatically: gcloud app create
+# - create docker repo manually, and authorize: 
+    gcloud auth configure-docker europe-west6-docker.pkg.dev 
+    gcloud artifacts repositories create hello-cloud --repository-format=docker --location=europe-west6 
 --> 
 
 
