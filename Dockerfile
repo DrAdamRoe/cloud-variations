@@ -2,7 +2,7 @@
 
 ## Dockerfile to build a basic flask app, based on https://docs.docker.com/language/python/
 
-FROM python:3.13-slim-trixie
+FROM python:3.15-slim-trixie
 
 COPY . . 
 

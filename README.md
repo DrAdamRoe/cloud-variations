@@ -28,9 +28,9 @@ The goal of this section is to install and run our little web server locally on 
 Before you get started, you are expected to have some other software on your computer
 
 
-- Python 3.13 (tested with 3.13.5)
+- Python 3.15 (tested with 3.15.2)
 - git 
-- [Google Cloud SDK](https://cloud.google.com/sdk/docs/install-sdk), (tested with version 534.0.0)
+- [Google Cloud SDK](https://cloud.google.com/sdk/docs/install-sdk), (tested with version 592.0.0)
 - An integrated development environment, like VS Code. 
 - [Docker](https://www.docker.com/products/docker-desktop) for building and running docker images locally. 
 
@@ -40,9 +40,9 @@ Before you get started, you are expected to have some other software on your com
 
 - Install a local python virtual environment with python 3.13 to work with,
 
-    macOS/Linux: `python3.13 -m venv venv`
+    macOS/Linux: `python3.15 -m venv venv`
     
-    Windows: `c:\Python313\python -m venv c:\path\to\myenv`
+    Windows: `c:\Python315\python -m venv c:\path\to\myenv`
 
 - Activate your virtual environment for this project: 
    
@@ -133,17 +133,18 @@ We begin with the most high-level, abstract, hands-of approach to running our se
 Enable Cloud Functions and Cloud Run on your project, 
 
 `gcloud services enable cloudfunctions.googleapis.com`
+
 `gcloud services enable run.googleapis.com`
 
 And now we will deploy a single _function_ from our application, the function `index()` found in the file `api/hello_cloud.py`: 
 
-`gcloud functions deploy hello_cloud --gen2 --runtime python313 --trigger-http --allow-unauthenticated --max-instances 2 --set-build-env-vars=GOOGLE_FUNCTION_SOURCE=api/hello_cloud.py --region=europe-west6`
+`gcloud functions deploy hello_cloud --gen2 --runtime python315 --trigger-http --allow-unauthenticated --max-instances 2 --set-build-env-vars=GOOGLE_FUNCTION_SOURCE=api/hello_cloud.py --region=europe-west10`
 
-This reads as: "Hey Google, deploy a Cloud Function for me called hello_cloud, which is both the name of the function that I've defined as well as the name that you'll use to identify the function. That function is in the file api/hello_cloud.py. Use the second generation of cloud functions, an improvement on the older version. Use the Python 3.13 runtime, anyone can access it on the internet without authentication, but only allow 2 instance to not run up my bill. Run the function if there is an HTTP request to the URL. Run this in  Zurich, since it is a low emissions data center and has all the features we need." 
+This reads as: "Hey Google, deploy a Cloud Function for me called hello_cloud, which is both the name of the function that I've defined as well as the name that you'll use to identify the function. That function is in the file api/hello_cloud.py. Use the second generation of cloud functions, an improvement on the older version. Use the Python 3.15 runtime, anyone can access it on the internet without authentication, but only allow 2 instance to not run up my bill. Run the function if there is an HTTP request to the URL. Run this in  Zurich, since it is a low emissions data center and has all the features we need." 
 
 You should be able to now see your function running live on the internet now, at the url listed in the output of the command or in the console. It has a format like 
 
-[https://{Region}-{ProjectID}.cloudfunctions.net/{function-name}, in my case https://europe-west6-cloud-variations.cloudfunctions.net/hello_cloud](). 
+[https://{Region}-{ProjectID}.cloudfunctions.net/{function-name}, in my case https://europe-west10-cloud-variations.cloudfunctions.net/hello_cloud](). 
 
 And there we have it: you can run a piece of code on Google's Cloud without any concern for how to manage the server, just setting a few basic parameters.  
 
@@ -276,13 +277,13 @@ In this variation, we will use Google's Platform-as-Service offering, Google App
 
 Create an instance of an App, either from the CLI or through the dashboard. Be sure to get the projectId from the previous step: 
 
-`gcloud app create --project=cloud-variations --region=europe-west6`
+`gcloud app create --project=cloud-variations --region=europe-west`
 
 again, you can check it's status at the CLI or the dashboard: 
 
 `gcloud app describe --project=cloud-variations`
 
-Note that at this stage, you have created an "application", but there is nothing being served yet. You will automatically have a custom URL for this project, which has the format PROJECT_ID.appspot.com, in my case https://cloud-variations.appspot.com. If you navigate to your own URL, you will get a 404: there is nothing being served there yet. 
+Note that at this stage, you have created an "application", but there is nothing being served yet. You will automatically have a custom URL for this project, which has the format PROJECT_ID.appspot.com, in my case https://cloud-variations.appspot.com. If you navigate to your own URL, you will get an error. 
 
 Now, we can deploy our app! The application configuration is entirely described in a single file, called `app-engine.yaml`. To deploy, we will tell app engine to use the configuration we have detailed in that file: 
 
@@ -304,31 +305,31 @@ and run it locally:
 
 `docker run --publish 5017:5022 hello-cloud`
 
-Note that if you are on a Mac with an ARM processor, the container you build with the above command will not run on more standard x86 Intel processors, which are found, for example, on the cloud. So much for Docker's old slogan "Build Once, Run Anywhere". To resolve this, build your docker container with the additional flag `--platform linux/amd64` if you are on an ARM Mac. You'll get a warning when running that image locally, but the same container will then work both locally and on the cloud (it will not be very efficient locally, but that is fine for this tutorial).
+Note that if you are on a Mac with an ARM processor, the container you build with the above command will not run on more standard x86 Intel processors, which are found, for example, on the cloud. So much for Docker's old slogan "Build Once, Run Anywhere". To resolve this, build your docker container with the additional flag `--platform linux/amd64` if you are on an ARM Mac both while building and running the container.
 
 At this point, you should be able to again make a request locally, via `curl localhost:5017` or by going to the browser (for example, the Simple Browser built into VS Code).
 
-At this stage it is worth it to have a look at our Dockerfile, even if you aren't very familiar with Docker. We first define which base image we are using - in this case, an imagine provided by the Python Organization built on top of Debian 13 (codename trixie). This gives us an operating system and everything we need to run Python 3.13. Then, we copy files from our local development environment into Docker's working area, and after that, we do the same thing as we do locally without Docker: install packages, set an environment variable, and run the app. Just this time, it is running as a Docker container on our own computer. The Docker Desktop app is a good way to explore Docker's options too.
+At this stage it is worth it to have a look at our Dockerfile, even if you aren't very familiar with Docker. We first define which base image we are using - in this case, an imagine provided by the Python Organization built on top of Debian 13 (codename trixie). This gives us an operating system and everything we need to run Python 3.15. Then, we copy files from our local development environment into Docker's working area, and after that, we do the same thing as we do locally without Docker: install packages, set an environment variable, and run the app. Just this time, it is running as a Docker container on our own computer. The Docker Desktop app is a good way to explore Docker's options too.
 
 ### Push the Image to Google Cloud 
 
 Now that we've built an image locally, we'll push that Docker Image to Google's Artifact Repository. To do this, we will use the tool provided by gCloud to authorize yourself on Docker on your machine giving you permissions to push to your Google Cloud Artifact Registry: 
 
-`gcloud auth configure-docker europe-west6-docker.pkg.dev`
+`gcloud auth configure-docker europe-west10-docker.pkg.dev`
 
 Next, create a repository in the Artifact Registry for you to store your image in: 
 
-`gcloud artifacts repositories create hello-cloud --repository-format=docker --location=europe-west6`
+`gcloud artifacts repositories create hello-cloud --repository-format=docker --location=europe-west10`
 
 Note that the format "Docker" specifies that what type of artifact the repository should expect, a Docker Image. 
 
 Now you can tag your local image to push to a specific location, telling Docker where you will push it: to the repository you just created. You should replace `cloud-variations` with your project name: 
 
-`docker tag hello-cloud:latest europe-west6-docker.pkg.dev/cloud-variations/hello-cloud/hello-cloud:latest`
+`docker tag hello-cloud:latest europe-west10-docker.pkg.dev/cloud-variations/hello-cloud/hello-cloud:latest`
 
 And finally, push it to Google's Artifact Repository: 
 
-`docker push europe-west6-docker.pkg.dev/cloud-variations/hello-cloud/hello-cloud:latest`
+`docker push europe-west10-docker.pkg.dev/cloud-variations/hello-cloud/hello-cloud:latest`
 
 Phew. We've built a Docker image locally and pushed it to Google Cloud. You can see the fruits of your labors (and browse the directory structure) over on the dashboard at https://console.cloud.google.com/artifacts. You should be able to see a container called hello-cloud (that you just made), as well as something called "gcf-artifacts" which was created when we used Google Cloud Functions earlier. 
 
@@ -340,7 +341,7 @@ Sometimes cloud services feels like they were generated by putting random buzzwo
 
 We will create and deploy our new _service_, which will tell Cloud Run to run between 2 and 5 instances of our container based on the image we have built and pushed already. 
 
-`gcloud run deploy hello-cloud-run --image=europe-west6-docker.pkg.dev/cloud-variations/hello-cloud/hello-cloud:latest --port=5022 --region=europe-west6 --allow-unauthenticated --min-instances=2 --max-instances=5`
+`gcloud run deploy hello-cloud-run --image=europe-west10-docker.pkg.dev/cloud-variations/hello-cloud/hello-cloud:latest --port=5022 --region=europe-west10 --allow-unauthenticated --min-instances=2 --max-instances=5`
 
 This command should feel a bit like the one we used for the FaaS offering at the start, but with a bit more control. If your container runs locally but not on google cloud, you may need to change the build architecture. Have a look at the troubleshooting section below. 
 
